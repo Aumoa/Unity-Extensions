@@ -39,12 +39,12 @@ namespace Ayla.Inspector.Editor
                 aylaMember.OnGUI(rect, new GUIContent(aylaMember.DisplayName));
             }
 
+            float spacing = rect.height + EditorGUIUtility.standardVerticalSpacing;
             if (layout)
             {
-                EditorGUILayout.Space(rect.height);
+                EditorGUILayout.Space(spacing);
             }
-            position.y += rect.height;
-            position.y += EditorGUIUtility.standardVerticalSpacing;
+            position.y += spacing;
 
             if (aylaMember.IsExpanded)
             {
