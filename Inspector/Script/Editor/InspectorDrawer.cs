@@ -31,16 +31,16 @@ namespace Ayla.Inspector.Editor
 
             if (aylaMember.IsEditable)
             {
-                aylaMember.OnGUI(rect, new GUIContent(aylaMember.DisplayName));
+                aylaMember.OnGUI(rect, aylaMember.Label);
             }
             else
             {
                 using var scope = new EditorGUI.DisabledScope(disabled: true);
-                aylaMember.OnGUI(rect, new GUIContent(aylaMember.DisplayName));
+                aylaMember.OnGUI(rect, aylaMember.Label);
             }
 
             float spacing = rect.height + EditorGUIUtility.standardVerticalSpacing;
-            if (layout)
+            if (layout && aylaMember is not InspectorScriptMember)
             {
                 EditorGUILayout.Space(spacing);
             }

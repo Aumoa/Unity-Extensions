@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 
 using Ayla.Inspector.Meta;
+
 using UnityEditor;
 
 using UnityEditorInternal;
@@ -15,6 +16,8 @@ namespace Ayla.Inspector.Editor.Members
     public abstract class InspectorMember
     {
         private readonly MemberInfo memberInfo;
+
+        private GUIContent cachedLabel;
 
         protected InspectorMember(MemberInfo memberInfo, string propertyPath)
         {
@@ -75,6 +78,15 @@ namespace Ayla.Inspector.Editor.Members
                 {
                 }
                 return true;
+            }
+        }
+
+        public GUIContent Label
+        {
+            get
+            {
+                cachedLabel ??= new GUIContent(DisplayName);
+                return cachedLabel;
             }
         }
     }
