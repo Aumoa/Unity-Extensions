@@ -173,7 +173,7 @@ namespace Ayla.Inspector.Editor.Extensions
                     return methodInfo.ReturnType;
                 case ConstructorInfo constructorInfo:
                     return constructorInfo.DeclaringType;
-                case EventInfo eventInfo:
+                case EventInfo:
                     return null;
                 default:
                     throw new InvalidOperationException("MemberInfo is corrupted.");
@@ -192,7 +192,7 @@ namespace Ayla.Inspector.Editor.Extensions
                     return methodInfo.Invoke(target, Array.Empty<object>());
                 case ConstructorInfo constructorInfo:
                     return constructorInfo.DeclaringType;
-                case EventInfo eventInfo:
+                case EventInfo:
                     return null;
                 default:
                     throw new InvalidOperationException("MemberInfo is corrupted.");
@@ -201,47 +201,42 @@ namespace Ayla.Inspector.Editor.Extensions
 
         public static IEnumerable<InspectorMember> GetInspectorChildren(this SerializedObject serializedObject)
         {
-            return GetInspectorChildren(serializedObject.targetObject, serializedObject.GetChildren());
+            return GetInspectorChildren(serializedObject.targetObject, null, serializedObject.GetChildren());
         }
 
-        public static IEnumerable<InspectorMember> GetInspectorChildren(this SerializedProperty serializedProperty)
+        public static IEnumerable<InspectorMember> GetInspectorChildren(this object targetObject, InspectorMember parent, IEnumerable<SerializedProperty> serializedProperties)
         {
-            return GetInspectorChildren(serializedProperty.GetTargetObject(), serializedProperty.GetChildren());
-        }
-
-        private static IEnumerable<InspectorMember> GetInspectorChildren(object targetObject, IEnumerable<SerializedProperty> serializedProperties)
-        {
-            if (targetObject == null)
-            {
-                yield break;
-            }
-
             var targetType = targetObject.GetType();
             if (targetObject is IList list)
             {
-                // Type is serializable.
-                foreach (var serializedProperty in serializedProperties)
+                var enumerator = serializedProperties.GetEnumerator();
+
+                for (int i = 0; i < list.Count; ++i)
                 {
-                    yield return new InspectorSerializedFieldMember(serializedProperty);
+                    if (enumerator.MoveNext() == false)
+                    {
+                        Debug.Assert(false);
+                        break;
+                    }
+
+                    yield return new InspectorSerializedFieldMember(parent, () => list[i], enumerator.Current, null, $"[{i}]");
                 }
             }
             else
             {
-                var a = serializedProperties.ToArray();
-                var b = a.Select(p => p.name).ToArray();
-                var dict = a.ToDictionary(p => p.name, p => p);
-                var members = targetType.ForEachMembers(null).ToArray();
+                var dict = serializedProperties.ToDictionary(p => p.name, p => p);
 
                 if (dict.TryGetValue("m_Script", out var scriptMember))
                 {
-                    yield return new InspectorScriptMember(scriptMember);
+                    yield return new InspectorScriptMember(parent, scriptMember, "m_Script");
                 }
 
-                foreach (var member in members)
+                foreach (var memberInfo in targetType.ForEachMembers(null))
                 {
-                    if (dict.TryGetValue(member.Name, out var serialized))
+                    if (dict.TryGetValue(memberInfo.Name, out var serializedProperty))
                     {
-                        yield return new InspectorSerializedFieldMember(serialized);
+                        var fieldInfo = (FieldInfo)memberInfo;
+                        yield return new InspectorSerializedFieldMember(parent, () => fieldInfo.GetValue(targetObject), serializedProperty, fieldInfo, memberInfo.Name);
                     }
                 }
             }

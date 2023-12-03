@@ -15,14 +15,30 @@ namespace Ayla.Inspector.Editor.Members
 {
     public abstract class InspectorMember
     {
+        private readonly InspectorMember parent;
+        private readonly Func<object> currentObject;
         private readonly MemberInfo memberInfo;
 
         private GUIContent cachedLabel;
 
-        protected InspectorMember(MemberInfo memberInfo, string propertyPath)
+        protected InspectorMember(InspectorMember parent, Func<object> currentObject, MemberInfo memberInfo, string pathName)
         {
+            this.parent = parent;
+            this.currentObject = currentObject;
             this.memberInfo = memberInfo;
-            PropertyPath = propertyPath;
+            if (parent == null)
+            {
+                PropertyPath = pathName;
+            }
+            else
+            {
+                PropertyPath = parent.PropertyPath + '.' + pathName;
+            }
+        }
+
+        public override string ToString()
+        {
+            return $"{PropertyPath} ({currentObject})";
         }
 
         public abstract void OnGUI(Rect rect, GUIContent label);
@@ -32,6 +48,21 @@ namespace Ayla.Inspector.Editor.Members
         public abstract IEnumerable<InspectorMember> GetChildren();
 
         public abstract ReorderableList GenerateReorderableList();
+
+        public MemberInfo GetMemberInfo()
+        {
+            return memberInfo;
+        }
+
+        public InspectorMember GetParent()
+        {
+            return parent;
+        }
+
+        public object GetValue()
+        {
+            return currentObject?.Invoke();
+        }
 
         public Attribute[] GetCustomAttributes(Type type)
         {
@@ -64,20 +95,33 @@ namespace Ayla.Inspector.Editor.Members
         {
             get
             {
-                var groups = GetCustomAttributes<LogicalGroupAttribute>()
-                    .ToDictionary(p => p.GroupId, p => p);
-                if (groups.ContainsKey(int.MinValue))
+                if (GetCustomAttribute<ReadOnlyAttribute>() != null)
                 {
-                    throw new InvalidOperationException($"GroupId {int.MinValue} is not allowed.");
+                    return true;
                 }
 
-                Dictionary<int, List<DisableIfAttribute>> groupAttributes = new();
-
-                var attributes = GetCustomAttributes<DisableIfAttribute>();
-                foreach (var attribute in attributes)
+                var parent = GetParent();
+                if (parent == null)
                 {
+                    return false;
                 }
-                return true;
+
+                var siblings = parent.GetChildren()
+                    .GroupBy(p => p.Name)
+                    .ToDictionary(p => p.Key, p => p.First());
+                foreach (var disableIf in GetCustomAttributes<DisableIfAttribute>())
+                {
+                    if (siblings.TryGetValue(disableIf.Name, out var sibling))
+                    {
+                        switch (disableIf.Comparison)
+                        {
+                            case Comparison.Equals:
+                                return sibling.GetValue()?.Equals(disableIf.Value) == true;
+                        }
+                    }
+                }
+
+                return false;
             }
         }
 

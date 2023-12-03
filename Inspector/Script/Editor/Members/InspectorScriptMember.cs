@@ -10,7 +10,8 @@ namespace Ayla.Inspector.Editor.Members
     {
         private readonly SerializedProperty serializedProperty;
 
-        public InspectorScriptMember(SerializedProperty serializedProperty) : base(null, serializedProperty.propertyPath)
+        public InspectorScriptMember(InspectorMember parent, SerializedProperty serializedProperty, string pathName)
+            : base(parent, null, null, pathName)
         {
             this.serializedProperty = serializedProperty;
         }

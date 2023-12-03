@@ -1,10 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 using Ayla.Inspector.Editor.Extensions;
+using Ayla.Inspector.Meta;
 
 using UnityEditor;
+
 using UnityEditorInternal;
+
 using UnityEngine;
 
 namespace Ayla.Inspector.Editor.Members
@@ -30,8 +35,8 @@ namespace Ayla.Inspector.Editor.Members
             Initialize();
         }
 
-        public InspectorSerializedFieldMember(SerializedProperty serializedProperty)
-            : base(serializedProperty.GetMemberInfo(), serializedProperty.propertyPath)
+        public InspectorSerializedFieldMember(InspectorMember parent, Func<object> ownedObject, SerializedProperty serializedProperty, MemberInfo memberInfo, string pathName)
+            : base(parent, ownedObject, memberInfo, pathName)
         {
             this.serializedProperty = serializedProperty;
             CacheChildren();
@@ -39,7 +44,7 @@ namespace Ayla.Inspector.Editor.Members
 
         private void CacheChildren()
         {
-            children = serializedProperty.GetInspectorChildren().ToArray();
+            children = GetValue().GetInspectorChildren(this, serializedProperty.GetChildren()).ToArray();
         }
 
         public override float GetHeight()
@@ -72,6 +77,11 @@ namespace Ayla.Inspector.Editor.Members
             list.drawElementCallback += (rect, index, isActive, isFocused) =>
             {
                 rect.x += 10.0f;
+                if (Children.Length <= index)
+                {
+                    children = null;
+                    return;
+                }
                 InspectorDrawer.OnGUI_Element(Children[index], new Vector2(rect.x, rect.y), false);
             };
             list.onAddCallback += list =>

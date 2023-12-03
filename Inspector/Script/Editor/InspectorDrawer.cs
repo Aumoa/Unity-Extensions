@@ -29,15 +29,9 @@ namespace Ayla.Inspector.Editor
                 height = aylaMember.GetHeight()
             };
 
-            if (aylaMember.IsEditable)
-            {
-                aylaMember.OnGUI(rect, aylaMember.Label);
-            }
-            else
-            {
-                using var scope = new EditorGUI.DisabledScope(disabled: true);
-                aylaMember.OnGUI(rect, aylaMember.Label);
-            }
+            bool isDisabled = !aylaMember.IsEditable || aylaMember.IsDisabled;
+            using var disabledScope = new EditorGUI.DisabledScope(disabled: isDisabled);
+            aylaMember.OnGUI(rect, aylaMember.Label);
 
             float spacing = rect.height + EditorGUIUtility.standardVerticalSpacing;
             if (layout && aylaMember is not InspectorScriptMember)
@@ -65,7 +59,7 @@ namespace Ayla.Inspector.Editor
                 }
                 else
                 {
-                    using var scope = new EditorGUI.IndentLevelScope();
+                    using var indentScope = new EditorGUI.IndentLevelScope();
                     foreach (var child in aylaMember.GetChildren())
                     {
                         position = OnGUI_Element(child, position, layout);
