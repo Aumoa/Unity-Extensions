@@ -3,9 +3,9 @@
 namespace Ayla.Inspector.Meta
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method, AllowMultiple = true)]
-    public class DisableIfAttribute : MetaIfAttribute
+    public class ShowIfAttribute : MetaIfAttribute
     {
-        public DisableIfAttribute(string name, object value) : base(name, value)
+        public ShowIfAttribute(string name, object value) : base(name, value)
         {
             Inverted = false;
         }

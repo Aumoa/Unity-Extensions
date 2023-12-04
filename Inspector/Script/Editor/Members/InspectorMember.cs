@@ -106,23 +106,141 @@ namespace Ayla.Inspector.Editor.Members
                     return false;
                 }
 
-                var siblings = parent.GetChildren()
-                    .GroupBy(p => p.Name)
-                    .ToDictionary(p => p.Key, p => p.First());
-                foreach (var disableIf in GetCustomAttributes<DisableIfAttribute>())
+                if (IsConditionalPass(parent, GetCustomAttributes<DisableIfAttribute>()))
                 {
-                    if (siblings.TryGetValue(disableIf.Name, out var sibling))
-                    {
-                        switch (disableIf.Comparison)
-                        {
-                            case Comparison.Equals:
-                                return sibling.GetValue()?.Equals(disableIf.Value) == true;
-                        }
-                    }
+                    return true;
                 }
 
                 return false;
             }
+        }
+
+        public virtual bool IsVisible
+        {
+            get
+            {
+                if (GetCustomAttribute<HideInInspector>() != null)
+                {
+                    return false;
+                }
+
+                var showIfAttrs = GetCustomAttributes<ShowIfAttribute>();
+                if (showIfAttrs.Any() == false)
+                {
+                    return true;
+                }
+
+                var parent = GetParent();
+                if (parent == null)
+                {
+                    return false;
+                }
+
+                if (IsConditionalPass(parent, showIfAttrs))
+                {
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
+        private static bool IsConditionalPass(InspectorMember parent, IEnumerable<MetaIfAttribute> ifAttributes)
+        {
+            var siblings = parent.GetChildren()
+                .GroupBy(p => p.Name)
+                .ToDictionary(p => p.Key, p => p.First());
+
+            foreach (var ifAttribute in ifAttributes)
+            {
+                if (siblings.TryGetValue(ifAttribute.Name, out var sibling))
+                {
+                    object lValue = sibling.GetValue();
+                    object rValue = ifAttribute.Value;
+
+                    if (lValue is IComparable comparable)
+                    {
+                        switch (ifAttribute.Comparison)
+                        {
+                            case Comparison.Equals:
+                                if (comparable.CompareTo(rValue) == 0)
+                                {
+                                    return true;
+                                }
+                                break;
+                            case Comparison.NotEquals:
+                                if (comparable.CompareTo(rValue) != 0)
+                                {
+                                    return true;
+                                }
+                                break;
+                            case Comparison.Greater:
+                                if (comparable.CompareTo(rValue) > 0)
+                                {
+                                    return true;
+                                }
+                                break;
+                            case Comparison.GreaterEquals:
+                                if (comparable.CompareTo(rValue) >= 0)
+                                {
+                                    return true;
+                                }
+                                break;
+                            case Comparison.Less:
+                                if (comparable.CompareTo(rValue) < 0)
+                                {
+                                    return true;
+                                }
+                                break;
+                            case Comparison.LessEquals:
+                                if (comparable.CompareTo(rValue) <= 0)
+                                {
+                                    return true;
+                                }
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        switch (ifAttribute.Comparison)
+                        {
+                            case Comparison.Equals:
+                                if (lValue?.Equals(rValue) == true)
+                                {
+                                    return true;
+                                }
+                                break;
+                            case Comparison.NotEquals:
+                                if (lValue?.Equals(rValue) == false)
+                                {
+                                    return true;
+                                }
+                                break;
+                        }
+                    }
+
+                    if (lValue is IConvertible lConv && rValue is IConvertible rConv)
+                    {
+                        switch (ifAttribute.Comparison)
+                        {
+                            case Comparison.FlagContains:
+                                if ((lConv.ToInt32(null) & rConv.ToInt32(null)) > 0)
+                                {
+                                    return true;
+                                }
+                                break;
+                            case Comparison.FlagNotContains:
+                                if ((lConv.ToInt32(null) & rConv.ToInt32(null)) == 0)
+                                {
+                                    return true;
+                                }
+                                break;
+                        }
+                    }
+                }
+            }
+
+            return false;
         }
 
         public GUIContent Label

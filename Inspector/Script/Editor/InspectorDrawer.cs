@@ -21,6 +21,11 @@ namespace Ayla.Inspector.Editor
     {
         public static Vector2 OnGUI_Element(InspectorMember aylaMember, Vector2 position, bool layout)
         {
+            if (aylaMember.IsVisible == false)
+            {
+                return position;
+            }
+
             var rect = new Rect()
             {
                 x = position.x,
@@ -72,6 +77,11 @@ namespace Ayla.Inspector.Editor
 
         public static float GetHeight_Element(InspectorMember aylaMember)
         {
+            if (aylaMember.IsVisible == false)
+            {
+                return 0;
+            }
+
             float height = aylaMember.GetHeight();
             if (aylaMember.IsExpanded)
             {
