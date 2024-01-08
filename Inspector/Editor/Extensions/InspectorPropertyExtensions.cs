@@ -6,6 +6,7 @@ using UnityEditor;
 using UnityEngine;
 using System.Collections;
 using Ayla.Inspector.Editor.Members;
+using Ayla.Inspector.Meta;
 
 namespace Ayla.Inspector.Editor.Extensions
 {
@@ -17,11 +18,6 @@ namespace Ayla.Inspector.Editor.Extensions
         private static void Initialize()
         {
             s_FieldTypes.Clear();
-        }
-
-        public static bool IsAylaInspector(this Type type)
-        {
-            return true;
         }
 
         private static string NormalizeUnityPath(this string path)
@@ -206,6 +202,11 @@ namespace Ayla.Inspector.Editor.Extensions
 
         public static IEnumerable<InspectorMember> GetInspectorChildren(this object targetObject, InspectorMember parent, IEnumerable<SerializedProperty> serializedProperties)
         {
+            if (targetObject == null)
+            {
+                yield break;
+            }
+
             var targetType = targetObject.GetType();
             if (targetObject is IList list)
             {
@@ -237,6 +238,13 @@ namespace Ayla.Inspector.Editor.Extensions
                     {
                         var fieldInfo = (FieldInfo)memberInfo;
                         yield return new InspectorSerializedFieldMember(parent, () => fieldInfo.GetValue(targetObject), serializedProperty, fieldInfo, memberInfo.Name);
+                    }
+                    else if (memberInfo.GetCustomAttribute<NonSerializeFieldAttribute>() != null)
+                    {
+                        if (memberInfo is FieldInfo fieldInfo)
+                        {
+                            yield return new InspectorNonSerializedFieldMember(parent, () => fieldInfo.GetValue(targetObject), fieldInfo, memberInfo.Name);
+                        }
                     }
                 }
             }

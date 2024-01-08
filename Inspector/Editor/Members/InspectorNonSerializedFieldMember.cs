@@ -1,9 +1,14 @@
-﻿using System;
+﻿// Copyright 2020-2023 Aumoa.lib. All right reserved.
+
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
+using Ayla.Inspector.Editor.Drawer;
 using Ayla.Inspector.Editor.Extensions;
+using Ayla.Inspector.Editor.Utilities;
 
 using UnityEditor;
 
@@ -13,59 +18,38 @@ using UnityEngine;
 
 namespace Ayla.Inspector.Editor.Members
 {
-    public class InspectorSerializedFieldMember : InspectorMember
+    public class InspectorNonSerializedFieldMember : InspectorMember
     {
-        private readonly SerializedProperty serializedProperty;
+        private NativePropertyDrawer drawer;
         private InspectorMember[] cachedChildren;
+        private FieldInfo fieldInfo;
 
-        private static GUIStyle s_FoldoutStyle;
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void Initialize()
+        public InspectorNonSerializedFieldMember(InspectorMember parent, Func<object> ownedObject, FieldInfo fieldInfo, string pathName)
+            : base(parent, ownedObject, fieldInfo, pathName)
         {
-            s_FoldoutStyle = new GUIStyle(EditorStyles.foldout)
-            {
-                fontStyle = FontStyle.Bold
-            };
-        }
-
-        static InspectorSerializedFieldMember()
-        {
-            Initialize();
-        }
-
-        public InspectorSerializedFieldMember(InspectorMember parent, Func<object> ownedObject, SerializedProperty serializedProperty, MemberInfo memberInfo, string pathName)
-            : base(parent, ownedObject, memberInfo, pathName)
-        {
-            this.serializedProperty = serializedProperty;
+            this.fieldInfo = fieldInfo;
+            drawer = ScriptAttributeUtility.InstantiateNativePropertyDrawer(fieldInfo.FieldType);
             CacheChildren();
         }
 
         private void CacheChildren()
         {
-            cachedChildren = GetValue().GetInspectorChildren(this, serializedProperty.GetChildren()).ToArray();
+            cachedChildren = GetValue().GetInspectorChildren(this, Enumerable.Empty<SerializedProperty>()).ToArray();
         }
 
         public override float GetHeight()
         {
-            return EditorGUI.GetPropertyHeight(serializedProperty, includeChildren: false);
+            return drawer?.GetPropertyHeight(this, label) ?? 0;
         }
 
         public override void OnGUI(Rect rect, GUIContent label)
         {
-            if (isList)
-            {
-                serializedProperty.isExpanded = EditorGUI.Foldout(rect, serializedProperty.isExpanded, label, s_FoldoutStyle);
-            }
-            else
-            {
-                EditorGUI.PropertyField(rect, serializedProperty, label, includeChildren: false);
-            }
+            drawer?.OnGUI(rect, this, label);
         }
 
         public override ReorderableList GenerateReorderableList()
         {
-            var list = new ReorderableList(serializedProperty.serializedObject, serializedProperty, true, false, true, true)
+            var list = new ReorderableList((IList)GetValue(), fieldInfo.FieldType, true, false, true, true)
             {
                 headerHeight = 0
             };
@@ -113,19 +97,14 @@ namespace Ayla.Inspector.Editor.Members
             }
         }
 
-        public override IEnumerable<InspectorMember> GetChildren()
-        {
-            return children;
-        }
+        public override IEnumerable<InspectorMember> GetChildren() => children;
 
-        public override string name => serializedProperty.name;
+        public override string name => fieldInfo.Name;
 
-        public override string displayName => serializedProperty.displayName;
+        public override bool isEditable => !fieldInfo.IsInitOnly;
 
-        public override bool isEditable => serializedProperty.editable;
+        public override bool isExpanded => InspectorDrawer.IsExpanded(this);
 
-        public override bool isExpanded => serializedProperty.isExpanded;
-
-        public override bool isList => serializedProperty.IsList();
+        public override bool isList => fieldInfo.FieldType == typeof(IList) || fieldInfo.FieldType.IsSubclassOf(typeof(IList));
     }
 }

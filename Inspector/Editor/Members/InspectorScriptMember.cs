@@ -36,14 +36,14 @@ namespace Ayla.Inspector.Editor.Members
             return new ReorderableList(serializedProperty.serializedObject, serializedProperty);
         }
 
-        public override string Name => serializedProperty.name;
+        public override string name => serializedProperty.name;
 
-        public override string DisplayName => "Ayla Script";
+        public override string displayName => "Ayla Script";
 
-        public override bool IsEditable => false;
+        public override bool isEditable => false;
 
-        public override bool IsExpanded => false;
+        public override bool isExpanded => false;
 
-        public override bool IsList => false;
+        public override bool isList => false;
     }
 }

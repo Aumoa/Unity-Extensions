@@ -21,7 +21,7 @@ namespace Ayla.Inspector.Editor
     {
         public static Vector2 OnGUI_Element(InspectorMember aylaMember, Vector2 position, bool layout)
         {
-            if (aylaMember.IsVisible == false)
+            if (aylaMember.isVisible == false)
             {
                 return position;
             }
@@ -34,9 +34,9 @@ namespace Ayla.Inspector.Editor
                 height = aylaMember.GetHeight()
             };
 
-            bool isDisabled = !aylaMember.IsEditable || aylaMember.IsDisabled;
+            bool isDisabled = !aylaMember.isEditable || aylaMember.isDisabled;
             using var disabledScope = new EditorGUI.DisabledScope(disabled: isDisabled);
-            aylaMember.OnGUI(rect, aylaMember.Label);
+            aylaMember.OnGUI(rect, aylaMember.label);
 
             float spacing = rect.height + EditorGUIUtility.standardVerticalSpacing;
             if (layout && aylaMember is not InspectorScriptMember)
@@ -45,9 +45,9 @@ namespace Ayla.Inspector.Editor
             }
             position.y += spacing;
 
-            if (aylaMember.IsExpanded)
+            if (aylaMember.isExpanded)
             {
-                if (aylaMember.IsList)
+                if (aylaMember.isList)
                 {
                     var list = GetReorderableList(aylaMember);
                     rect.y = position.y;
@@ -77,15 +77,15 @@ namespace Ayla.Inspector.Editor
 
         public static float GetHeight_Element(InspectorMember aylaMember)
         {
-            if (aylaMember.IsVisible == false)
+            if (aylaMember.isVisible == false)
             {
                 return 0;
             }
 
             float height = aylaMember.GetHeight();
-            if (aylaMember.IsExpanded)
+            if (aylaMember.isExpanded)
             {
-                if (aylaMember.IsList)
+                if (aylaMember.isList)
                 {
                     var list = GetReorderableList(aylaMember);
                     height += list.GetHeight();
@@ -134,21 +134,21 @@ namespace Ayla.Inspector.Editor
 
         public static bool IsExpanded(InspectorMember member)
         {
-            Current.s_IsExpanded.TryGetValue(member.PropertyPath, out bool value);
+            Current.s_IsExpanded.TryGetValue(member.propertyPath, out bool value);
             return value;
         }
 
         public static void UpdateExpanded(InspectorMember member, bool expanded)
         {
-            Current.s_IsExpanded[member.PropertyPath] = expanded;
+            Current.s_IsExpanded[member.propertyPath] = expanded;
         }
 
         public static ReorderableList GetReorderableList(InspectorMember member)
         {
-            if (Current.s_ReorderableLists.TryGetValue(member.PropertyPath, out var list) == false)
+            if (Current.s_ReorderableLists.TryGetValue(member.propertyPath, out var list) == false)
             {
                 list = member.GenerateReorderableList();
-                Current.s_ReorderableLists.Add(member.PropertyPath, list);
+                Current.s_ReorderableLists.Add(member.propertyPath, list);
             }
             return list;
         }

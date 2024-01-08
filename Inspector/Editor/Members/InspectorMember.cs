@@ -28,17 +28,17 @@ namespace Ayla.Inspector.Editor.Members
             this.memberInfo = memberInfo;
             if (parent == null)
             {
-                PropertyPath = pathName;
+                propertyPath = pathName;
             }
             else
             {
-                PropertyPath = parent.PropertyPath + '.' + pathName;
+                propertyPath = parent.propertyPath + '.' + pathName;
             }
         }
 
         public override string ToString()
         {
-            return $"{PropertyPath} ({currentObject})";
+            return $"{propertyPath} ({currentObject})";
         }
 
         public abstract void OnGUI(Rect rect, GUIContent label);
@@ -79,19 +79,31 @@ namespace Ayla.Inspector.Editor.Members
             return memberInfo?.GetCustomAttributes<T>().ToArray() ?? Array.Empty<T>();
         }
 
-        public abstract string Name { get; }
+        public abstract string name { get; }
 
-        public virtual string DisplayName => ObjectNames.NicifyVariableName(Name);
+        public virtual string displayName
+        {
+            get
+            {
+                var attribute = GetCustomAttribute<LabelAttribute>();
+                if (attribute != null)
+                {
+                    return attribute.labelName;
+                }
 
-        public virtual string PropertyPath { get; }
+                return ObjectNames.NicifyVariableName(name);
+            }
+        }
 
-        public abstract bool IsEditable { get; }
+        public virtual string propertyPath { get; }
 
-        public abstract bool IsExpanded { get; }
+        public abstract bool isEditable { get; }
 
-        public abstract bool IsList { get; }
+        public abstract bool isExpanded { get; }
 
-        public virtual bool IsDisabled
+        public abstract bool isList { get; }
+
+        public virtual bool isDisabled
         {
             get
             {
@@ -115,7 +127,7 @@ namespace Ayla.Inspector.Editor.Members
             }
         }
 
-        public virtual bool IsVisible
+        public virtual bool isVisible
         {
             get
             {
@@ -148,7 +160,7 @@ namespace Ayla.Inspector.Editor.Members
         private static bool IsConditionalPass(InspectorMember parent, IEnumerable<MetaIfAttribute> ifAttributes)
         {
             var siblings = parent.GetChildren()
-                .GroupBy(p => p.Name)
+                .GroupBy(p => p.name)
                 .ToDictionary(p => p.Key, p => p.First());
 
             foreach (var ifAttribute in ifAttributes)
@@ -243,11 +255,11 @@ namespace Ayla.Inspector.Editor.Members
             return false;
         }
 
-        public GUIContent Label
+        public GUIContent label
         {
             get
             {
-                cachedLabel ??= new GUIContent(DisplayName);
+                cachedLabel ??= new GUIContent(displayName);
                 return cachedLabel;
             }
         }
