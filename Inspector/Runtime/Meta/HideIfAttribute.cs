@@ -3,11 +3,11 @@
 namespace Ayla.Inspector.Meta
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method, AllowMultiple = true)]
-    public class ShowIfAttribute : VisibilityIfAttribute
+    public class HideIfAttribute : VisibilityIfAttribute
     {
-        public ShowIfAttribute(string name, object value) : base(name, value)
+        public HideIfAttribute(string name, object value) : base(name, value)
         {
-            inverted = false;
+            inverted = true;
         }
     }
 }

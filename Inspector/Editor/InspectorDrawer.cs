@@ -19,7 +19,9 @@ namespace Ayla.Inspector.Editor
     [CanEditMultipleObjects]
     public class InspectorDrawer : UnityEditor.Editor
     {
-        public static Vector2 OnGUI_Element(InspectorMember aylaMember, Vector2 position, bool layout)
+        private InspectorSerializedObjectMember inspectorMember;
+
+        public static Vector2 OnGUI_Element(InspectorMember aylaMember, Vector2 position, bool isLayout)
         {
             if (aylaMember.isVisible == false)
             {
@@ -34,15 +36,11 @@ namespace Ayla.Inspector.Editor
                 height = aylaMember.GetHeight()
             };
 
-            bool isDisabled = !aylaMember.isEditable || aylaMember.isDisabled;
+            bool isDisabled = !aylaMember.isEditable || !aylaMember.isEnabled;
             using var disabledScope = new EditorGUI.DisabledScope(disabled: isDisabled);
-            aylaMember.OnGUI(rect, aylaMember.label);
+            aylaMember.OnGUI(rect, aylaMember.label, isLayout);
 
             float spacing = rect.height + EditorGUIUtility.standardVerticalSpacing;
-            if (layout && aylaMember is not InspectorScriptMember)
-            {
-                EditorGUILayout.Space(spacing);
-            }
             position.y += spacing;
 
             if (aylaMember.isExpanded)
@@ -56,18 +54,13 @@ namespace Ayla.Inspector.Editor
 
                     position.y += rect.height;
                     position.y += EditorGUIUtility.standardVerticalSpacing;
-
-                    if (layout)
-                    {
-                        EditorGUILayout.Space(rect.height);
-                    }
                 }
                 else
                 {
                     using var indentScope = new EditorGUI.IndentLevelScope();
                     foreach (var child in aylaMember.GetChildren())
                     {
-                        position = OnGUI_Element(child, position, layout);
+                        position = OnGUI_Element(child, position, isLayout);
                     }
                 }
             }
@@ -107,10 +100,11 @@ namespace Ayla.Inspector.Editor
                 // get starting position.
                 var rc = EditorGUILayout.GetControlRect();
                 Vector2 position = new(rc.x, rc.y);
-                foreach (var child in serializedObject.GetInspectorChildren())
-                {
-                    position = OnGUI_Element(child, position, true);
-                }
+                inspectorMember ??= serializedObject.GetInspector(null, string.Empty);
+                
+                float height = inspectorMember.GetHeight();
+                Rect drawingRect = new Rect(position.x, position.y, EditorGUIUtility.currentViewWidth - position.x, height);
+                inspectorMember.OnGUI(drawingRect, inspectorMember.label, true);
             });
         }
 

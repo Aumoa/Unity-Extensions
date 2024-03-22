@@ -1,19 +1,19 @@
 ﻿namespace Ayla.Inspector.Meta
 {
-    public class MetaIfAttribute : MetaAttribute
+    public abstract class MetaIfAttribute : MetaAttribute
     {
-        public string Name { get; set; }
+        public string name { get; set; }
 
-        public object Value { get; set; }
+        public object value { get; set; }
 
-        public Comparison Comparison { get; set; }
+        public Comparison comparison { get; set; }
 
-        public bool Inverted { get; protected set; }
+        public bool inverted { get; protected set; }
 
         public MetaIfAttribute(string name, object value)
         {
-            Name = name;
-            Value = value;
+            this.name = name;
+            this.value = value;
         }
     }
 }

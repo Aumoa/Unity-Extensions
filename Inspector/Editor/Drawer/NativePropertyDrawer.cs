@@ -17,10 +17,17 @@ namespace Ayla.Inspector.Editor.Drawer
         {
         }
 
-        public virtual void OnGUI(Rect position, InspectorMember property, GUIContent label)
+        public virtual void OnGUI(Rect position, InspectorMember property, GUIContent label, bool isLayout)
         {
             cachedContent ??= new GUIContent("No GUI Implemented (NativePropertyDrawer)");
-            EditorGUI.LabelField(position, label, cachedContent);
+            if (isLayout)
+            {
+                EditorGUILayout.LabelField(label, cachedContent);
+            }
+            else
+            {
+                EditorGUI.LabelField(position, label, cachedContent);
+            }
         }
 
         public virtual float GetPropertyHeight(InspectorMember property, GUIContent label)

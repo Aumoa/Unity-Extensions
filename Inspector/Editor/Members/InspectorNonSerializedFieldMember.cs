@@ -5,15 +5,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-
 using Ayla.Inspector.Editor.Drawer;
 using Ayla.Inspector.Editor.Extensions;
 using Ayla.Inspector.Editor.Utilities;
-
 using UnityEditor;
-
 using UnityEditorInternal;
-
 using UnityEngine;
 
 namespace Ayla.Inspector.Editor.Members
@@ -42,9 +38,9 @@ namespace Ayla.Inspector.Editor.Members
             return drawer?.GetPropertyHeight(this, label) ?? 0;
         }
 
-        public override void OnGUI(Rect rect, GUIContent label)
+        public override void OnGUI(Rect rect, GUIContent label, bool isLayout)
         {
-            drawer?.OnGUI(rect, this, label);
+            drawer?.OnGUI(rect, this, label, isLayout);
         }
 
         public override ReorderableList GenerateReorderableList()

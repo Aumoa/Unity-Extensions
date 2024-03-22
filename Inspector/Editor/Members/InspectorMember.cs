@@ -19,6 +19,7 @@ namespace Ayla.Inspector.Editor.Members
         private readonly Func<object> currentObject;
         private readonly MemberInfo memberInfo;
 
+        private Dictionary<string, InspectorMember> cachedSiblings;
         private GUIContent cachedLabel;
 
         protected InspectorMember(InspectorMember parent, Func<object> currentObject, MemberInfo memberInfo, string pathName)
@@ -41,7 +42,7 @@ namespace Ayla.Inspector.Editor.Members
             return $"{propertyPath} ({currentObject})";
         }
 
-        public abstract void OnGUI(Rect rect, GUIContent label);
+        public abstract void OnGUI(Rect rect, GUIContent label, bool isLayout);
 
         public abstract float GetHeight();
 
@@ -103,13 +104,13 @@ namespace Ayla.Inspector.Editor.Members
 
         public abstract bool isList { get; }
 
-        public virtual bool isDisabled
+        public virtual bool isEnabled
         {
             get
             {
                 if (GetCustomAttribute<ReadOnlyAttribute>() != null)
                 {
-                    return true;
+                    return false;
                 }
 
                 var parent = GetParent();
@@ -118,9 +119,18 @@ namespace Ayla.Inspector.Editor.Members
                     return false;
                 }
 
-                if (IsConditionalPass(parent, GetCustomAttributes<DisableIfAttribute>()))
+                var activationAttrs = GetCustomAttributes<ActivationIfAttribute>();
+                if (activationAttrs.Length == 0)
                 {
                     return true;
+                }
+
+                foreach (var attr in activationAttrs)
+                {
+                    if (IsConditionalPass(siblings, attr) == !attr.inverted)
+                    {
+                        return true;
+                    }
                 }
 
                 return false;
@@ -136,8 +146,8 @@ namespace Ayla.Inspector.Editor.Members
                     return false;
                 }
 
-                var showIfAttrs = GetCustomAttributes<ShowIfAttribute>();
-                if (showIfAttrs.Any() == false)
+                var visibleAttrs = GetCustomAttributes<VisibilityIfAttribute>();
+                if (visibleAttrs.Any() == false)
                 {
                     return true;
                 }
@@ -148,106 +158,107 @@ namespace Ayla.Inspector.Editor.Members
                     return false;
                 }
 
-                if (IsConditionalPass(parent, showIfAttrs))
+                foreach (var attr in visibleAttrs)
                 {
-                    return true;
+                    if (IsConditionalPass(siblings, attr) == !attr.inverted)
+                    {
+                        return true;
+                    }
                 }
 
                 return false;
             }
         }
 
-        private static bool IsConditionalPass(InspectorMember parent, IEnumerable<MetaIfAttribute> ifAttributes)
+        private static bool IsConditionalPass(Dictionary<string, InspectorMember> siblings, MetaIfAttribute ifAttribute)
         {
-            var siblings = parent.GetChildren()
-                .GroupBy(p => p.name)
-                .ToDictionary(p => p.Key, p => p.First());
-
-            foreach (var ifAttribute in ifAttributes)
+            if (siblings == null)
             {
-                if (siblings.TryGetValue(ifAttribute.Name, out var sibling))
+                return true;
+            }
+
+            if (siblings.TryGetValue(ifAttribute.name, out var sibling))
+            {
+                object lValue = sibling.GetValue();
+                object rValue = ifAttribute.value;
+
+                if (lValue is IComparable comparable)
                 {
-                    object lValue = sibling.GetValue();
-                    object rValue = ifAttribute.Value;
-
-                    if (lValue is IComparable comparable)
+                    switch (ifAttribute.comparison)
                     {
-                        switch (ifAttribute.Comparison)
-                        {
-                            case Comparison.Equals:
-                                if (comparable.CompareTo(rValue) == 0)
-                                {
-                                    return true;
-                                }
-                                break;
-                            case Comparison.NotEquals:
-                                if (comparable.CompareTo(rValue) != 0)
-                                {
-                                    return true;
-                                }
-                                break;
-                            case Comparison.Greater:
-                                if (comparable.CompareTo(rValue) > 0)
-                                {
-                                    return true;
-                                }
-                                break;
-                            case Comparison.GreaterEquals:
-                                if (comparable.CompareTo(rValue) >= 0)
-                                {
-                                    return true;
-                                }
-                                break;
-                            case Comparison.Less:
-                                if (comparable.CompareTo(rValue) < 0)
-                                {
-                                    return true;
-                                }
-                                break;
-                            case Comparison.LessEquals:
-                                if (comparable.CompareTo(rValue) <= 0)
-                                {
-                                    return true;
-                                }
-                                break;
-                        }
+                        case Comparison.Equals:
+                            if (comparable.CompareTo(rValue) == 0)
+                            {
+                                return true;
+                            }
+                            break;
+                        case Comparison.NotEquals:
+                            if (comparable.CompareTo(rValue) != 0)
+                            {
+                                return true;
+                            }
+                            break;
+                        case Comparison.Greater:
+                            if (comparable.CompareTo(rValue) > 0)
+                            {
+                                return true;
+                            }
+                            break;
+                        case Comparison.GreaterEquals:
+                            if (comparable.CompareTo(rValue) >= 0)
+                            {
+                                return true;
+                            }
+                            break;
+                        case Comparison.Less:
+                            if (comparable.CompareTo(rValue) < 0)
+                            {
+                                return true;
+                            }
+                            break;
+                        case Comparison.LessEquals:
+                            if (comparable.CompareTo(rValue) <= 0)
+                            {
+                                return true;
+                            }
+                            break;
                     }
-                    else
+                }
+                else
+                {
+                    switch (ifAttribute.comparison)
                     {
-                        switch (ifAttribute.Comparison)
-                        {
-                            case Comparison.Equals:
-                                if (lValue?.Equals(rValue) == true)
-                                {
-                                    return true;
-                                }
-                                break;
-                            case Comparison.NotEquals:
-                                if (lValue?.Equals(rValue) == false)
-                                {
-                                    return true;
-                                }
-                                break;
-                        }
+                        case Comparison.Equals:
+                            if (lValue?.Equals(rValue) == true)
+                            {
+                                return true;
+                            }
+                            break;
+                        case Comparison.NotEquals:
+                            if (lValue?.Equals(rValue) == false)
+                            {
+                                return true;
+                            }
+                            break;
                     }
+                }
 
-                    if (lValue is IConvertible lConv && rValue is IConvertible rConv)
+                if (lValue is IConvertible lConv && rValue is IConvertible rConv)
+                {
+                    switch (ifAttribute.comparison)
                     {
-                        switch (ifAttribute.Comparison)
-                        {
-                            case Comparison.FlagContains:
-                                if ((lConv.ToInt32(null) & rConv.ToInt32(null)) > 0)
-                                {
-                                    return true;
-                                }
-                                break;
-                            case Comparison.FlagNotContains:
-                                if ((lConv.ToInt32(null) & rConv.ToInt32(null)) == 0)
-                                {
-                                    return true;
-                                }
-                                break;
-                        }
+                        case Comparison.FlagContains:
+                            if ((lConv.ToInt32(null) & rConv.ToInt32(null)) > 0)
+                            {
+                                return true;
+                            }
+                            break;
+                        case Comparison.FlagNotContains:
+                            if ((lConv.ToInt32(null) & rConv.ToInt32(null)) == 0)
+                            {
+                                return true;
+                            }
+                            break;
                     }
                 }
             }
@@ -261,6 +272,17 @@ namespace Ayla.Inspector.Editor.Members
             {
                 cachedLabel ??= new GUIContent(displayName);
                 return cachedLabel;
+            }
+        }
+
+        public Dictionary<string, InspectorMember> siblings
+        {
+            get
+            {
+                cachedSiblings ??= parent?.GetChildren()
+                    .GroupBy(p => p.name)
+                    .ToDictionary(p => p.Key, p => p.First());
+                return cachedSiblings;
             }
         }
     }

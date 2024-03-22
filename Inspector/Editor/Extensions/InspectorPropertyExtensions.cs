@@ -195,6 +195,11 @@ namespace Ayla.Inspector.Editor.Extensions
             }
         }
 
+        public static InspectorSerializedObjectMember GetInspector(this SerializedObject serializedObject, InspectorMember parent, string pathName)
+        {
+            return new InspectorSerializedObjectMember(parent, serializedObject, pathName);
+        }
+
         public static IEnumerable<InspectorMember> GetInspectorChildren(this SerializedObject serializedObject)
         {
             return GetInspectorChildren(serializedObject.targetObject, null, serializedObject.GetChildren());
