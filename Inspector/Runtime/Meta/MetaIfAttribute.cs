@@ -8,8 +8,6 @@
 
         public Comparison comparison { get; set; }
 
-        public bool inverted { get; protected set; }
-
         public MetaIfAttribute(string name, object value)
         {
             this.name = name;

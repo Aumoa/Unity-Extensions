@@ -1,31 +1,34 @@
-﻿using System;
+﻿// Copyright 2020-2023 Aumoa.lib. All right reserved.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-
 using Ayla.Inspector.Meta;
-
 using UnityEditor;
-
 using UnityEditorInternal;
-
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Ayla.Inspector.Editor.Members
 {
     public abstract class InspectorMember
     {
         private readonly InspectorMember parent;
-        private readonly Func<object> currentObject;
+        private readonly Object unityObject;
+        private readonly Func<object> getter;
+        private readonly Action<object> setter;
         private readonly MemberInfo memberInfo;
 
         private Dictionary<string, InspectorMember> cachedSiblings;
         private GUIContent cachedLabel;
 
-        protected InspectorMember(InspectorMember parent, Func<object> currentObject, MemberInfo memberInfo, string pathName)
+        protected InspectorMember(InspectorMember parent, Object unityObject, Func<object> getter, Action<object> setter, MemberInfo memberInfo, string pathName)
         {
             this.parent = parent;
-            this.currentObject = currentObject;
+            this.unityObject = unityObject;
+            this.getter = getter;
+            this.setter = setter;
             this.memberInfo = memberInfo;
             if (parent == null)
             {
@@ -39,7 +42,7 @@ namespace Ayla.Inspector.Editor.Members
 
         public override string ToString()
         {
-            return $"{propertyPath} ({currentObject})";
+            return $"{propertyPath} ({getter?.Invoke()})";
         }
 
         public abstract void OnGUI(Rect rect, GUIContent label, bool isLayout);
@@ -60,9 +63,22 @@ namespace Ayla.Inspector.Editor.Members
             return parent;
         }
 
+        public Object GetUnityObject()
+        {
+            return unityObject;
+        }
+
         public object GetValue()
         {
-            return currentObject?.Invoke();
+            return getter?.Invoke();
+        }
+
+        public void SetValue(object value)
+        {
+            if (setter != null)
+            {
+                setter.Invoke(value);
+            }
         }
 
         public Attribute[] GetCustomAttributes(Type type)
@@ -170,7 +186,7 @@ namespace Ayla.Inspector.Editor.Members
             }
         }
 
-        private static bool IsConditionalPass(Dictionary<string, InspectorMember> siblings, MetaIfAttribute ifAttribute)
+        private static bool IsConditionalPass(Dictionary<string, InspectorMember> siblings, InvertableIfAttribute ifAttribute)
         {
             if (siblings == null)
             {

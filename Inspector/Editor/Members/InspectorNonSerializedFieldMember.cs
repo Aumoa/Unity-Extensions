@@ -1,6 +1,4 @@
-﻿// Copyright 2020-2023 Aumoa.lib. All right reserved.
-
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +9,7 @@ using Ayla.Inspector.Editor.Utilities;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Ayla.Inspector.Editor.Members
 {
@@ -20,8 +19,8 @@ namespace Ayla.Inspector.Editor.Members
         private InspectorMember[] cachedChildren;
         private FieldInfo fieldInfo;
 
-        public InspectorNonSerializedFieldMember(InspectorMember parent, Func<object> ownedObject, FieldInfo fieldInfo, string pathName)
-            : base(parent, ownedObject, fieldInfo, pathName)
+        public InspectorNonSerializedFieldMember(InspectorMember parent, Object unityObject, Func<object> getter, Action<object> setter, FieldInfo fieldInfo, string pathName)
+            : base(parent, unityObject, getter, setter, fieldInfo, pathName)
         {
             this.fieldInfo = fieldInfo;
             drawer = ScriptAttributeUtility.InstantiateNativePropertyDrawer(fieldInfo.FieldType);
@@ -30,12 +29,16 @@ namespace Ayla.Inspector.Editor.Members
 
         private void CacheChildren()
         {
-            cachedChildren = GetValue().GetInspectorChildren(this, Enumerable.Empty<SerializedProperty>()).ToArray();
+            cachedChildren = GetValue().GetInspectorChildren(GetUnityObject(), this, Enumerable.Empty<SerializedProperty>()).ToArray();
         }
 
         public override float GetHeight()
         {
-            return drawer?.GetPropertyHeight(this, label) ?? 0;
+            if (isVisible)
+            {
+                return drawer?.GetPropertyHeight(this, label) ?? 0;
+            }
+            return 0;
         }
 
         public override void OnGUI(Rect rect, GUIContent label, bool isLayout)

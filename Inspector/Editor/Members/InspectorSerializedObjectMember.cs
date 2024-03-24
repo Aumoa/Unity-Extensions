@@ -4,6 +4,7 @@ using Ayla.Inspector.Editor.Extensions;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Ayla.Inspector.Editor.Members
 {
@@ -13,8 +14,8 @@ namespace Ayla.Inspector.Editor.Members
 
         private InspectorMember[] cachedChildren;
 
-        public InspectorSerializedObjectMember(InspectorMember parent, SerializedObject serializedObject, string pathName)
-            : base(parent, () => serializedObject.targetObject, null, pathName)
+        public InspectorSerializedObjectMember(InspectorMember parent, Object unityObject, SerializedObject serializedObject, string pathName)
+            : base(parent, unityObject, () => serializedObject.targetObject, null, null, pathName)
         {
             this.serializedObject = serializedObject;
             CacheChildren();
@@ -40,12 +41,16 @@ namespace Ayla.Inspector.Editor.Members
 
         public override float GetHeight()
         {
-            float height = 0f;
-            foreach (var child in GetChildren())
+            if (isVisible)
             {
-                height += InspectorDrawer.GetHeight_Element(child);
+                float height = 0f;
+                foreach (var child in GetChildren())
+                {
+                    height += InspectorDrawer.GetHeight_Element(child);
+                }
+                return height;
             }
-            return height;
+            return 0.0f;
         }
 
         public override void OnGUI(Rect rect, GUIContent label, bool isLayout)
@@ -59,7 +64,7 @@ namespace Ayla.Inspector.Editor.Members
 
         private void CacheChildren()
         {
-            cachedChildren = GetValue().GetInspectorChildren(this, serializedObject.GetChildren()).ToArray();
+            cachedChildren = GetValue().GetInspectorChildren(GetUnityObject(), this, serializedObject.GetChildren()).ToArray();
         }
     }
 }

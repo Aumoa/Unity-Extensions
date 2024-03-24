@@ -100,7 +100,7 @@ namespace Ayla.Inspector.Editor
                 // get starting position.
                 var rc = EditorGUILayout.GetControlRect();
                 Vector2 position = new(rc.x, rc.y);
-                inspectorMember ??= serializedObject.GetInspector(null, string.Empty);
+                inspectorMember ??= serializedObject.GetInspector(serializedObject.targetObject, null, string.Empty);
                 
                 float height = inspectorMember.GetHeight();
                 Rect drawingRect = new Rect(position.x, position.y, EditorGUIUtility.currentViewWidth - position.x, height);

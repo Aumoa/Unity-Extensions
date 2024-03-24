@@ -7,7 +7,7 @@ namespace Ayla.Inspector.Editor.Drawer
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class CustomNativePropertyDrawerAttribute : Attribute
     {
-        public CustomNativePropertyDrawerAttribute(Type targetType, bool useForChildren)
+        public CustomNativePropertyDrawerAttribute(Type targetType, bool useForChildren = false)
         {
             this.targetType = targetType;
             this.useForChildren = useForChildren;

@@ -1,12 +1,8 @@
-﻿// Copyright 2020-2023 Aumoa.lib. All right reserved.
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-
 using Ayla.Inspector.Editor.Drawer;
-
 using UnityEditor;
 
 namespace Ayla.Inspector.Editor.Utilities

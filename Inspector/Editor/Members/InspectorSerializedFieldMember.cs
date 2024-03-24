@@ -2,14 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-
 using Ayla.Inspector.Editor.Extensions;
-
 using UnityEditor;
-
 using UnityEditorInternal;
-
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Ayla.Inspector.Editor.Members
 {
@@ -34,8 +31,8 @@ namespace Ayla.Inspector.Editor.Members
             Initialize();
         }
 
-        public InspectorSerializedFieldMember(InspectorMember parent, Func<object> ownedObject, SerializedProperty serializedProperty, MemberInfo memberInfo, string pathName)
-            : base(parent, ownedObject, memberInfo, pathName)
+        public InspectorSerializedFieldMember(InspectorMember parent, Object unityObject, Func<object> getter, Action<object> setter, SerializedProperty serializedProperty, MemberInfo memberInfo, string pathName)
+            : base(parent, unityObject, getter, setter, memberInfo, pathName)
         {
             this.serializedProperty = serializedProperty;
             CacheChildren();
@@ -43,12 +40,16 @@ namespace Ayla.Inspector.Editor.Members
 
         private void CacheChildren()
         {
-            cachedChildren = GetValue().GetInspectorChildren(this, serializedProperty.GetChildren()).ToArray();
+            cachedChildren = GetValue().GetInspectorChildren(GetUnityObject(), this, serializedProperty.GetChildren()).ToArray();
         }
 
         public override float GetHeight()
         {
-            return EditorGUI.GetPropertyHeight(serializedProperty, includeChildren: false);
+            if (isVisible)
+            {
+                return EditorGUI.GetPropertyHeight(serializedProperty, includeChildren: false);
+            }
+            return 0;
         }
 
         public override void OnGUI(Rect rect, GUIContent label, bool isLayout)

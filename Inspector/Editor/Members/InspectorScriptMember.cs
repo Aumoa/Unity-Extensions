@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Ayla.Inspector.Editor.Members
 {
@@ -10,8 +11,8 @@ namespace Ayla.Inspector.Editor.Members
     {
         private readonly SerializedProperty serializedProperty;
 
-        public InspectorScriptMember(InspectorMember parent, SerializedProperty serializedProperty, string pathName)
-            : base(parent, null, null, pathName)
+        public InspectorScriptMember(InspectorMember parent, Object unityObject, SerializedProperty serializedProperty, string pathName)
+            : base(parent, unityObject, null, null, null, pathName)
         {
             this.serializedProperty = serializedProperty;
         }

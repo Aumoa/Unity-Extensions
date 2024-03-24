@@ -7,6 +7,7 @@ using UnityEngine;
 using System.Collections;
 using Ayla.Inspector.Editor.Members;
 using Ayla.Inspector.Meta;
+using Object = UnityEngine.Object;
 
 namespace Ayla.Inspector.Editor.Extensions
 {
@@ -195,17 +196,17 @@ namespace Ayla.Inspector.Editor.Extensions
             }
         }
 
-        public static InspectorSerializedObjectMember GetInspector(this SerializedObject serializedObject, InspectorMember parent, string pathName)
+        public static InspectorSerializedObjectMember GetInspector(this SerializedObject serializedObject, Object unityObject, InspectorMember parent, string pathName)
         {
-            return new InspectorSerializedObjectMember(parent, serializedObject, pathName);
+            return new InspectorSerializedObjectMember(parent, unityObject, serializedObject, pathName);
         }
 
-        public static IEnumerable<InspectorMember> GetInspectorChildren(this SerializedObject serializedObject)
+        public static IEnumerable<InspectorMember> GetInspectorChildren(this SerializedObject serializedObject, Object unityObject)
         {
-            return GetInspectorChildren(serializedObject.targetObject, null, serializedObject.GetChildren());
+            return GetInspectorChildren(serializedObject.targetObject, unityObject, null, serializedObject.GetChildren());
         }
 
-        public static IEnumerable<InspectorMember> GetInspectorChildren(this object targetObject, InspectorMember parent, IEnumerable<SerializedProperty> serializedProperties)
+        public static IEnumerable<InspectorMember> GetInspectorChildren(this object targetObject, Object unityObject, InspectorMember parent, IEnumerable<SerializedProperty> serializedProperties)
         {
             if (targetObject == null)
             {
@@ -225,7 +226,15 @@ namespace Ayla.Inspector.Editor.Extensions
                         break;
                     }
 
-                    yield return new InspectorSerializedFieldMember(parent, () => list[i], enumerator.Current, null, $"[{i}]");
+                    yield return new InspectorSerializedFieldMember(
+                        parent,
+                        unityObject,
+                        () => list[i],
+                        value => list[i] = value,
+                        enumerator.Current,
+                        null,
+                        $"[{i}]"
+                        );
                 }
             }
             else
@@ -234,7 +243,7 @@ namespace Ayla.Inspector.Editor.Extensions
 
                 if (dict.TryGetValue("m_Script", out var scriptMember))
                 {
-                    yield return new InspectorScriptMember(parent, scriptMember, "m_Script");
+                    yield return new InspectorScriptMember(parent, unityObject, scriptMember, "m_Script");
                 }
 
                 foreach (var memberInfo in targetType.ForEachMembers(null))
@@ -242,13 +251,28 @@ namespace Ayla.Inspector.Editor.Extensions
                     if (dict.TryGetValue(memberInfo.Name, out var serializedProperty))
                     {
                         var fieldInfo = (FieldInfo)memberInfo;
-                        yield return new InspectorSerializedFieldMember(parent, () => fieldInfo.GetValue(targetObject), serializedProperty, fieldInfo, memberInfo.Name);
+                        yield return new InspectorSerializedFieldMember(
+                            parent,
+                            unityObject,
+                            () => fieldInfo.GetValue(targetObject),
+                            value => fieldInfo.SetValue(targetObject, value),
+                            serializedProperty,
+                            fieldInfo,
+                            memberInfo.Name
+                            );
                     }
                     else if (memberInfo.GetCustomAttribute<NonSerializeFieldAttribute>() != null)
                     {
                         if (memberInfo is FieldInfo fieldInfo)
                         {
-                            yield return new InspectorNonSerializedFieldMember(parent, () => fieldInfo.GetValue(targetObject), fieldInfo, memberInfo.Name);
+                            yield return new InspectorNonSerializedFieldMember(
+                                parent,
+                                unityObject,
+                                () => fieldInfo.GetValue(targetObject),
+                                value => fieldInfo.SetValue(targetObject, value),
+                                fieldInfo,
+                                memberInfo.Name
+                                );
                         }
                     }
                 }
