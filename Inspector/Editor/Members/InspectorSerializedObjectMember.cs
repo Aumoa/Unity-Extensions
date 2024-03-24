@@ -41,25 +41,11 @@ namespace Ayla.Inspector.Editor.Members
 
         public override float GetHeight()
         {
-            if (isVisible)
-            {
-                float height = 0f;
-                foreach (var child in GetChildren())
-                {
-                    height += InspectorDrawer.GetHeight_Element(child);
-                }
-                return height;
-            }
             return 0.0f;
         }
 
-        public override void OnGUI(Rect rect, GUIContent label, bool isLayout)
+        public override void OnGUI(Rect rect, GUIContent label)
         {
-            var position = rect.position;
-            foreach (var child in GetChildren())
-            {
-                position = InspectorDrawer.OnGUI_Element(child, position, isLayout);
-            }
         }
 
         private void CacheChildren()

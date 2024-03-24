@@ -41,9 +41,9 @@ namespace Ayla.Inspector.Editor.Members
             return 0;
         }
 
-        public override void OnGUI(Rect rect, GUIContent label, bool isLayout)
+        public override void OnGUI(Rect rect, GUIContent label)
         {
-            drawer?.OnGUI(rect, this, label, isLayout);
+            drawer?.OnGUI(rect, this, label);
         }
 
         public override ReorderableList GenerateReorderableList()

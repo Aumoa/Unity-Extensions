@@ -1,16 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using Ayla.Inspector.Editor.Extensions;
 using Ayla.Inspector.Editor.Members;
-
 using UnityEditor;
-
 using UnityEditorInternal;
-
 using UnityEngine;
-
 using Object = UnityEngine.Object;
 
 namespace Ayla.Inspector.Editor
@@ -38,9 +33,13 @@ namespace Ayla.Inspector.Editor
 
             bool isDisabled = !aylaMember.isEditable || !aylaMember.isEnabled;
             using var disabledScope = new EditorGUI.DisabledScope(disabled: isDisabled);
-            aylaMember.OnGUI(rect, aylaMember.label, isLayout);
+            aylaMember.OnGUI(rect, aylaMember.label);
 
             float spacing = rect.height + EditorGUIUtility.standardVerticalSpacing;
+            if (isLayout && aylaMember is not InspectorScriptMember)
+            {
+                EditorGUILayout.Space(spacing);
+            }
             position.y += spacing;
 
             if (aylaMember.isExpanded)
@@ -54,6 +53,11 @@ namespace Ayla.Inspector.Editor
 
                     position.y += rect.height;
                     position.y += EditorGUIUtility.standardVerticalSpacing;
+
+                    if (isLayout)
+                    {
+                        EditorGUILayout.Space(rect.height);
+                    }
                 }
                 else
                 {
@@ -101,10 +105,10 @@ namespace Ayla.Inspector.Editor
                 var rc = EditorGUILayout.GetControlRect();
                 Vector2 position = new(rc.x, rc.y);
                 inspectorMember ??= serializedObject.GetInspector(serializedObject.targetObject, null, string.Empty);
-                
-                float height = inspectorMember.GetHeight();
-                Rect drawingRect = new Rect(position.x, position.y, EditorGUIUtility.currentViewWidth - position.x, height);
-                inspectorMember.OnGUI(drawingRect, inspectorMember.label, true);
+                foreach (var child in inspectorMember.GetChildren())
+                {
+                    position = OnGUI_Element(child, position, true);
+                }
             });
         }
 

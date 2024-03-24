@@ -45,7 +45,7 @@ namespace Ayla.Inspector.Editor.Members
             return $"{propertyPath} ({getter?.Invoke()})";
         }
 
-        public abstract void OnGUI(Rect rect, GUIContent label, bool isLayout);
+        public abstract void OnGUI(Rect rect, GUIContent label);
 
         public abstract float GetHeight();
 

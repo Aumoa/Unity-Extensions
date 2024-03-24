@@ -13,7 +13,7 @@ namespace Ayla.Inspector.Editor.Drawer
     [CustomNativePropertyDrawer(typeof(byte))]
     public class IntNativePropertyDrawer : NativePropertyDrawer
     {
-        public override void OnGUI(Rect position, InspectorMember property, GUIContent label, bool isLayout)
+        public override void OnGUI(Rect position, InspectorMember property, GUIContent label)
         {
             var value = (IConvertible)property.GetValue();
             var intValue = value.ToInt64(null);
@@ -21,14 +21,7 @@ namespace Ayla.Inspector.Editor.Drawer
 
             unchecked
             {
-                if (isLayout)
-                {
-                    intValue = EditorGUILayout.IntField(label, (int)intValue);
-                }
-                else
-                {
-                    intValue = EditorGUI.IntField(position, label, (int)intValue);
-                }
+                intValue = EditorGUI.IntField(position, label, (int)intValue);
 
                 if (GUI.changed)
                 {

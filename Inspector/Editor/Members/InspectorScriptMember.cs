@@ -22,16 +22,9 @@ namespace Ayla.Inspector.Editor.Members
             return EditorGUI.GetPropertyHeight(serializedProperty);
         }
 
-        public override void OnGUI(Rect rect, GUIContent label, bool isLayout)
+        public override void OnGUI(Rect rect, GUIContent label)
         {
-            if (isLayout)
-            {
-                EditorGUILayout.PropertyField(serializedProperty, label, includeChildren: false);
-            }
-            else
-            {
-                EditorGUI.PropertyField(rect, serializedProperty, label, includeChildren: false);
-            }
+            EditorGUI.PropertyField(rect, serializedProperty, label, includeChildren: false);
         }
 
         public override IEnumerable<InspectorMember> GetChildren()

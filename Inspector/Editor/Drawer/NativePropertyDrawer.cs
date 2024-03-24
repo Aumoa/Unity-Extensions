@@ -1,9 +1,5 @@
-﻿// Copyright 2020-2023 Aumoa.lib. All right reserved.
-
-using Ayla.Inspector.Editor.Members;
-
+﻿using Ayla.Inspector.Editor.Members;
 using UnityEditor;
-
 using UnityEngine;
 
 namespace Ayla.Inspector.Editor.Drawer
@@ -17,17 +13,10 @@ namespace Ayla.Inspector.Editor.Drawer
         {
         }
 
-        public virtual void OnGUI(Rect position, InspectorMember property, GUIContent label, bool isLayout)
+        public virtual void OnGUI(Rect position, InspectorMember property, GUIContent label)
         {
             cachedContent ??= new GUIContent("No GUI Implemented (NativePropertyDrawer)");
-            if (isLayout)
-            {
-                EditorGUILayout.LabelField(label, cachedContent);
-            }
-            else
-            {
-                EditorGUI.LabelField(position, label, cachedContent);
-            }
+            EditorGUI.LabelField(position, label, cachedContent);
         }
 
         public virtual float GetPropertyHeight(InspectorMember property, GUIContent label)

@@ -52,29 +52,15 @@ namespace Ayla.Inspector.Editor.Members
             return 0;
         }
 
-        public override void OnGUI(Rect rect, GUIContent label, bool isLayout)
+        public override void OnGUI(Rect rect, GUIContent label)
         {
             if (isList)
             {
-                if (isLayout)
-                {
-                    serializedProperty.isExpanded = EditorGUILayout.Foldout(serializedProperty.isExpanded, label, s_FoldoutStyle);
-                }
-                else
-                {
-                    serializedProperty.isExpanded = EditorGUI.Foldout(rect, serializedProperty.isExpanded, label, s_FoldoutStyle);
-                }
+                serializedProperty.isExpanded = EditorGUI.Foldout(rect, serializedProperty.isExpanded, label, s_FoldoutStyle);
             }
             else
             {
-                if (isLayout)
-                {
-                    EditorGUILayout.PropertyField(serializedProperty, label, includeChildren: false);
-                }
-                else
-                {
-                    EditorGUI.PropertyField(rect, serializedProperty, label, includeChildren: false);
-                }
+                EditorGUI.PropertyField(rect, serializedProperty, label, includeChildren: false);
             }
         }
 
