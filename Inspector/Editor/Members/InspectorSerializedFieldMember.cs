@@ -12,7 +12,7 @@ namespace Ayla.Inspector.Editor.Members
 {
     public class InspectorSerializedFieldMember : InspectorMember
     {
-        private readonly SerializedProperty serializedProperty;
+        public readonly SerializedProperty serializedProperty;
         private InspectorMember[] cachedChildren;
 
         private static GUIStyle s_FoldoutStyle;

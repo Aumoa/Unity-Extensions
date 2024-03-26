@@ -7,20 +7,13 @@ using UnityEngine;
 using System.Collections;
 using Ayla.Inspector.Editor.Members;
 using Ayla.Inspector.Meta;
+using Ayla.Inspector.SpecialCase;
 using Object = UnityEngine.Object;
 
 namespace Ayla.Inspector.Editor.Extensions
 {
     public static class InspectorPropertyExtensions
     {
-        private static readonly Dictionary<string, Type> s_FieldTypes = new();
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void Initialize()
-        {
-            s_FieldTypes.Clear();
-        }
-
         private static string NormalizeUnityPath(this string path)
         {
             return path
@@ -90,7 +83,6 @@ namespace Ayla.Inspector.Editor.Extensions
                         }
                     }
 
-                    var currentMember = memberType;
                     currentType = memberType.GetReturningType();
                     currentObject = memberType.GetReturningValue(currentObject);
                 }
@@ -149,7 +141,6 @@ namespace Ayla.Inspector.Editor.Extensions
                         }
                     }
 
-                    var currentMember = memberType;
                     currentType = memberType.GetReturningType();
                     memberInfo = memberType;
                 }
@@ -216,24 +207,24 @@ namespace Ayla.Inspector.Editor.Extensions
             var targetType = targetObject.GetType();
             if (targetObject is IList list)
             {
-                var enumerator = serializedProperties.GetEnumerator();
+                using var enumerator = serializedProperties.GetEnumerator();
 
                 for (int i = 0; i < list.Count; ++i)
                 {
                     if (enumerator.MoveNext() == false)
                     {
                         Debug.Assert(false);
-                        break;
                     }
 
+                    var lv = i;
                     yield return new InspectorSerializedFieldMember(
                         parent,
                         unityObject,
-                        () => list[i],
-                        value => list[i] = value,
+                        () => list[lv],
+                        value => list[lv] = value,
                         enumerator.Current,
                         null,
-                        $"[{i}]"
+                        $"[{lv}]"
                         );
                 }
             }
@@ -259,7 +250,7 @@ namespace Ayla.Inspector.Editor.Extensions
                             serializedProperty,
                             fieldInfo,
                             memberInfo.Name
-                            );
+                        );
                     }
                     else if (memberInfo.GetCustomAttribute<NonSerializeFieldAttribute>() != null)
                     {
@@ -272,7 +263,24 @@ namespace Ayla.Inspector.Editor.Extensions
                                 value => fieldInfo.SetValue(targetObject, value),
                                 fieldInfo,
                                 memberInfo.Name
+                            );
+                        }
+                    }
+                    else
+                    {
+                        var buttonAttribute = memberInfo.GetCustomAttribute<ButtonAttribute>();
+                        if (buttonAttribute != null)
+                        {
+                            if (memberInfo is MethodInfo methodInfo)
+                            {
+                                yield return new InspectorButtonMember(
+                                    parent,
+                                    unityObject,
+                                    methodInfo,
+                                    memberInfo.Name,
+                                    buttonAttribute
                                 );
+                            }
                         }
                     }
                 }
@@ -289,7 +297,7 @@ namespace Ayla.Inspector.Editor.Extensions
                 | BindingFlags.InvokeMethod
                 | BindingFlags.DeclaredOnly;
 
-            while (baseType != typeof(object))
+            while (baseType != typeof(object) && baseType != null)
             {
                 inTypeChangeCallback?.Invoke(baseType);
 
