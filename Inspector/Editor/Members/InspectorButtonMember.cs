@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Ayla.Inspector.SpecialCase;
@@ -65,6 +66,11 @@ namespace Ayla.Inspector.Editor.Members
         }
 
         public override ReorderableList GenerateReorderableList()
+        {
+            return null;
+        }
+
+        public override Type GetMemberType()
         {
             return null;
         }

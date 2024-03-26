@@ -15,7 +15,7 @@ namespace Ayla.Inspector.Editor.Drawer
 
         public virtual void OnGUI(Rect position, InspectorMember property, GUIContent label)
         {
-            cachedContent ??= new GUIContent("No GUI Implemented (NativePropertyDrawer)");
+            cachedContent ??= new GUIContent($"No GUI Implemented ({property.GetMemberType()})");
             EditorGUI.LabelField(position, label, cachedContent);
         }
 

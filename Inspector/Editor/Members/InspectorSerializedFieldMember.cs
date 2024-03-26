@@ -102,6 +102,11 @@ namespace Ayla.Inspector.Editor.Members
             return list;
         }
 
+        public override Type GetMemberType()
+        {
+            return ((FieldInfo)GetMemberInfo()).FieldType;
+        }
+
         public InspectorMember[] children
         {
             get

@@ -53,6 +53,8 @@ namespace Ayla.Inspector.Editor.Members
 
         public abstract ReorderableList GenerateReorderableList();
 
+        public abstract Type GetMemberType();
+
         public MemberInfo GetMemberInfo()
         {
             return memberInfo;

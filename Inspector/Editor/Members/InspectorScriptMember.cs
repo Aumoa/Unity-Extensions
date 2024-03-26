@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEditorInternal;
@@ -35,6 +36,11 @@ namespace Ayla.Inspector.Editor.Members
         public override ReorderableList GenerateReorderableList()
         {
             return new ReorderableList(serializedProperty.serializedObject, serializedProperty);
+        }
+
+        public override Type GetMemberType()
+        {
+            return null;
         }
 
         public override string name => serializedProperty.name;

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Ayla.Inspector.Editor.Extensions;
 using UnityEditor;
@@ -32,6 +33,11 @@ namespace Ayla.Inspector.Editor.Members
         public override ReorderableList GenerateReorderableList()
         {
             return null;
+        }
+
+        public override Type GetMemberType()
+        {
+            return serializedObject.targetObject.GetType();
         }
 
         public override IEnumerable<InspectorMember> GetChildren()

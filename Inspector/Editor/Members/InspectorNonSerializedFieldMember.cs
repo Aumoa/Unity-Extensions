@@ -84,6 +84,11 @@ namespace Ayla.Inspector.Editor.Members
             return list;
         }
 
+        public override Type GetMemberType()
+        {
+            return fieldInfo.FieldType;
+        }
+
         public InspectorMember[] children
         {
             get

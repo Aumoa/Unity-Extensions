@@ -4,70 +4,81 @@ using System.Linq;
 using System.Reflection;
 using Ayla.Inspector.Editor.Drawer;
 using UnityEditor;
+using UnityEngine;
 
 namespace Ayla.Inspector.Editor.Utilities
 {
     public static class ScriptAttributeUtility
     {
-        private static readonly Dictionary<Type, (Type drawerType, bool useForChildren)> s_PropertyDrawerCache = new();
-        private static readonly Dictionary<Type, (Type drawerType, bool useForChildren)> s_NativePropertyDrawerCache = new();
+        private static readonly Dictionary<Type, (Type drawerType, bool useForChildren)> s_PropertyDrawerCache;
+        private static readonly Dictionary<Type, (Type drawerType, bool useForChildren)> s_NativePropertyDrawerCache;
 
-        [InitializeOnLoadMethod]
+        static ScriptAttributeUtility()
+        {
+            s_PropertyDrawerCache = new Dictionary<Type, (Type drawerType, bool useForChildren)>();
+            s_NativePropertyDrawerCache = new Dictionary<Type, (Type drawerType, bool useForChildren)>();
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
         private static void InitializeComponents()
         {
-            s_PropertyDrawerCache.Clear();
-            s_NativePropertyDrawerCache.Clear();
-
-            FieldInfo m_Type = typeof(CustomPropertyDrawer).GetField("m_Type", BindingFlags.Instance | BindingFlags.NonPublic);
-            FieldInfo m_UseForChildren = typeof(CustomPropertyDrawer).GetField("m_UseForChildren", BindingFlags.Instance | BindingFlags.NonPublic);
-
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            lock (s_PropertyDrawerCache)
+            lock (s_NativePropertyDrawerCache)
             {
-                foreach (var type in assembly.GetTypes())
+                s_PropertyDrawerCache.Clear();
+                s_NativePropertyDrawerCache.Clear();
+
+                FieldInfo m_Type = typeof(CustomPropertyDrawer).GetField("m_Type", BindingFlags.Instance | BindingFlags.NonPublic);
+                FieldInfo m_UseForChildren = typeof(CustomPropertyDrawer).GetField("m_UseForChildren", BindingFlags.Instance | BindingFlags.NonPublic);
+
+                foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
                 {
-                    try
+                    foreach (var type in assembly.GetTypes())
                     {
-                        if (type == typeof(PropertyDrawer) || type.IsSubclassOf(typeof(PropertyDrawer)))
+                        try
                         {
-                            var isDrawer = type.GetCustomAttributes<CustomPropertyDrawer>();
-                            if (isDrawer?.Any() == true)
+                            if (type == typeof(PropertyDrawer) || type.IsSubclassOf(typeof(PropertyDrawer)))
                             {
-                                foreach (var drawerAttr in isDrawer)
+                                var isDrawer = type.GetCustomAttributes<CustomPropertyDrawer>();
+                                if (isDrawer?.Any() == true)
                                 {
-                                    var targetType = (Type)m_Type.GetValue(drawerAttr);
-                                    var useForChildren = (bool)m_UseForChildren.GetValue(drawerAttr);
-                                    s_PropertyDrawerCache.TryAdd(targetType, (type, useForChildren));
+                                    foreach (var drawerAttr in isDrawer)
+                                    {
+                                        var targetType = (Type)m_Type.GetValue(drawerAttr);
+                                        var useForChildren = (bool)m_UseForChildren.GetValue(drawerAttr);
+                                        s_PropertyDrawerCache.TryAdd(targetType, (type, useForChildren));
+                                    }
+                                }
+                            }
+                            else if (type == typeof(NativePropertyDrawer) || type.IsSubclassOf(typeof(NativePropertyDrawer)))
+                            {
+                                var isDrawer = type.GetCustomAttributes<CustomNativePropertyDrawerAttribute>(false);
+                                if (isDrawer?.Any() == true)
+                                {
+                                    foreach (var drawerAttr in isDrawer)
+                                    {
+                                        var targetType = drawerAttr.targetType;
+                                        var useForChildren = drawerAttr.useForChildren;
+                                        s_NativePropertyDrawerCache.TryAdd(targetType, (type, useForChildren));
+                                    }
                                 }
                             }
                         }
-                        else if (type == typeof(NativePropertyDrawer) || type.IsSubclassOf(typeof(NativePropertyDrawer)))
+                        catch
                         {
-                            var isDrawer = type.GetCustomAttributes<CustomNativePropertyDrawerAttribute>();
-                            if (isDrawer?.Any() == true)
-                            {
-                                foreach (var drawerAttr in isDrawer)
-                                {
-                                    var targetType = drawerAttr.targetType;
-                                    var useForChildren = drawerAttr.useForChildren;
-                                    s_NativePropertyDrawerCache.TryAdd(targetType, (type, useForChildren));
-                                }
-                            }
                         }
-                    }
-                    catch
-                    {
                     }
                 }
             }
         }
 
         public static PropertyDrawer InstantiatePropertyDrawer(Type targetType)
-            => InternalInstantiateDrawer(s_PropertyDrawerCache, targetType) as PropertyDrawer;
+            => InternalInstantiateDrawer(in s_PropertyDrawerCache, targetType) as PropertyDrawer;
 
         public static NativePropertyDrawer InstantiateNativePropertyDrawer(Type targetType)
-            => InternalInstantiateDrawer(s_NativePropertyDrawerCache, targetType) as NativePropertyDrawer;
+            => InternalInstantiateDrawer(in s_NativePropertyDrawerCache, targetType) as NativePropertyDrawer;
 
-        private static object InternalInstantiateDrawer(Dictionary<Type, (Type drawerType, bool useForChildren)> drawerCache, Type targetType)
+        private static object InternalInstantiateDrawer(in Dictionary<Type, (Type drawerType, bool useForChildren)> drawerCache, Type targetType)
         {
             lock (drawerCache)
             {
