@@ -78,8 +78,10 @@ namespace Ayla.Inspector.Editor.Members
         public override string name => methodInfo.Name;
         
         public override bool isEditable => true;
-        
-        public override bool isExpanded => false;
+
+        public override bool isExpanded { get; set; } = false;
+
+        public override bool isExpandable => false;
         
         public override bool isList => false;
 

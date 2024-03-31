@@ -107,7 +107,13 @@ namespace Ayla.Inspector.Editor.Members
 
         public override bool isEditable => !fieldInfo.IsInitOnly;
 
-        public override bool isExpanded => InspectorDrawer.IsExpanded(this);
+        public override bool isExpanded
+        {
+            get => InspectorDrawer.IsExpanded(this);
+            set => InspectorDrawer.UpdateExpanded(this, value);
+        }
+
+        public override bool isExpandable => GetMemberType().IsExpandable();
 
         public override bool isList => fieldInfo.FieldType == typeof(IList) || fieldInfo.FieldType.IsSubclassOf(typeof(IList));
     }

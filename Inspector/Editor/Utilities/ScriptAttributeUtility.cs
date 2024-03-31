@@ -84,9 +84,7 @@ namespace Ayla.Inspector.Editor.Utilities
             {
                 if (drawerCache.TryGetValue(targetType, out var cachedInfo) == false)
                 {
-                    Type drawerType = FindPropertyDrawerForChildren(drawerCache, targetType.BaseType);
-                    cachedInfo.drawerType = drawerType;
-                    cachedInfo.useForChildren = true;
+                    cachedInfo = FindPropertyDrawerForChildren(drawerCache, targetType.BaseType);
                     drawerCache.Add(targetType, cachedInfo);
                 }
 
@@ -106,19 +104,19 @@ namespace Ayla.Inspector.Editor.Utilities
             }
         }
 
-        private static Type FindPropertyDrawerForChildren(Dictionary<Type, (Type drawerType, bool useForChildren)> drawerCache, Type targetType)
+        private static (Type drawerType, bool useForChildren) FindPropertyDrawerForChildren(Dictionary<Type, (Type drawerType, bool useForChildren)> drawerCache, Type targetType)
         {
             if (targetType == null)
             {
-                return null;
+                return (null, false);
             }
 
-            if (drawerCache.TryGetValue(targetType, out var cachedInfo) == false)
+            if (drawerCache.TryGetValue(targetType, out var cachedInfo) && cachedInfo.useForChildren)
             {
-                return FindPropertyDrawerForChildren(drawerCache, targetType.BaseType);
+                return cachedInfo;
             }
 
-            return cachedInfo.drawerType;
+            return FindPropertyDrawerForChildren(drawerCache, targetType.BaseType);
         }
     }
 }

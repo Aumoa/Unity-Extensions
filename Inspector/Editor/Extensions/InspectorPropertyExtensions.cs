@@ -14,6 +14,12 @@ namespace Ayla.Inspector.Editor.Extensions
 {
     public static class InspectorPropertyExtensions
     {
+        public enum InspectorVisibility
+        {
+            None,
+            NonSerializedField
+        }
+
         private static string NormalizeUnityPath(this string path)
         {
             return path
@@ -251,8 +257,29 @@ namespace Ayla.Inspector.Editor.Extensions
                             fieldInfo,
                             memberInfo.Name
                         );
+
+                        continue;
                     }
-                    else if (memberInfo.GetCustomAttribute<NonSerializeFieldAttribute>() != null)
+
+                    var buttonAttribute = memberInfo.GetCustomAttribute<ButtonAttribute>();
+                    if (buttonAttribute != null)
+                    {
+                        if (memberInfo is MethodInfo methodInfo)
+                        {
+                            yield return new InspectorButtonMember(
+                                parent,
+                                unityObject,
+                                methodInfo,
+                                memberInfo.Name,
+                                buttonAttribute
+                            );
+
+                            continue;
+                        }
+                    }
+
+                    var inspectorVisibility = GetInspectorVisibility(memberInfo);
+                    if (inspectorVisibility == InspectorVisibility.NonSerializedField)
                     {
                         if (memberInfo is FieldInfo fieldInfo)
                         {
@@ -264,23 +291,6 @@ namespace Ayla.Inspector.Editor.Extensions
                                 fieldInfo,
                                 memberInfo.Name
                             );
-                        }
-                    }
-                    else
-                    {
-                        var buttonAttribute = memberInfo.GetCustomAttribute<ButtonAttribute>();
-                        if (buttonAttribute != null)
-                        {
-                            if (memberInfo is MethodInfo methodInfo)
-                            {
-                                yield return new InspectorButtonMember(
-                                    parent,
-                                    unityObject,
-                                    methodInfo,
-                                    memberInfo.Name,
-                                    buttonAttribute
-                                );
-                            }
                         }
                     }
                 }
@@ -359,6 +369,71 @@ namespace Ayla.Inspector.Editor.Extensions
                 }
                 while (iterator.Next(false));
             }
+        }
+
+        private static InspectorVisibility GetInspectorVisibility(MemberInfo memberInfo)
+        {
+            // If there is a SerializeField property but no SerializedProperty, the member is NonSerialized.
+            if (memberInfo.GetCustomAttribute<SerializeField>() != null)
+            {
+                return InspectorVisibility.NonSerializedField;
+            }
+
+            if (memberInfo.GetCustomAttribute<NonSerializeFieldAttribute>() != null)
+            {
+                return InspectorVisibility.NonSerializedField;
+            }
+
+            if (memberInfo is FieldInfo fieldInfo && fieldInfo.IsPublic && !fieldInfo.IsStatic && !fieldInfo.IsLiteral)
+            {
+                switch (Type.GetTypeCode(fieldInfo.FieldType))
+                {
+                    case TypeCode.Boolean:
+                    case TypeCode.SByte:
+                    case TypeCode.Byte:
+                    case TypeCode.UInt16:
+                    case TypeCode.Int16:
+                    case TypeCode.UInt32:
+                    case TypeCode.Int32:
+                    case TypeCode.UInt64:
+                    case TypeCode.Int64:
+                    case TypeCode.String:
+                    case TypeCode.Single:
+                    case TypeCode.Double:
+                    case TypeCode.Decimal:
+                        return InspectorVisibility.NonSerializedField;
+                }
+
+                if (fieldInfo.FieldType.GetCustomAttribute<SerializableAttribute>() != null)
+                {
+                    return InspectorVisibility.NonSerializedField;
+                }
+            }
+
+            return InspectorVisibility.None;
+        }
+
+        public static bool IsExpandable(this Type fieldType)
+        {
+            switch (Type.GetTypeCode(fieldType))
+            {
+                case TypeCode.Boolean:
+                case TypeCode.SByte:
+                case TypeCode.Byte:
+                case TypeCode.UInt16:
+                case TypeCode.Int16:
+                case TypeCode.UInt32:
+                case TypeCode.Int32:
+                case TypeCode.UInt64:
+                case TypeCode.Int64:
+                case TypeCode.String:
+                case TypeCode.Single:
+                case TypeCode.Double:
+                case TypeCode.Decimal:
+                    return false;
+            }
+
+            return fieldType.GetCustomAttribute<SerializableAttribute>() != null;
         }
     }
 }

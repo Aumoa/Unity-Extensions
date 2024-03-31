@@ -119,7 +119,9 @@ namespace Ayla.Inspector.Editor.Members
 
         public abstract bool isEditable { get; }
 
-        public abstract bool isExpanded { get; }
+        public abstract bool isExpanded { get; set; }
+
+        public abstract bool isExpandable { get; }
 
         public abstract bool isList { get; }
 

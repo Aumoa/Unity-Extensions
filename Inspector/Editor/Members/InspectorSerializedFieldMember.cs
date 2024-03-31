@@ -130,7 +130,13 @@ namespace Ayla.Inspector.Editor.Members
 
         public override bool isEditable => serializedProperty.editable;
 
-        public override bool isExpanded => serializedProperty.isExpanded;
+        public override bool isExpanded
+        {
+            get => serializedProperty.isExpanded;
+            set => serializedProperty.isExpanded = value;
+        }
+
+        public override bool isExpandable => GetMemberType().IsExpandable();
 
         public override bool isList => serializedProperty.IsList();
     }
