@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Ayla.Inspector.Meta;
+using Ayla.Inspector.Utilities;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
@@ -195,89 +196,95 @@ namespace Ayla.Inspector.Editor.Members
                 return true;
             }
 
-            if (siblings.TryGetValue(ifAttribute.name, out var sibling))
+            object lValue;
+            if (KnownPropertyNames.TryGetKnownProperty(ifAttribute.name, out lValue) == false)
             {
-                object lValue = sibling.GetValue();
-                object rValue = ifAttribute.value;
-
-                if (lValue is IComparable comparable)
+                if (siblings.TryGetValue(ifAttribute.name, out var sibling) == false)
                 {
-                    switch (ifAttribute.comparison)
-                    {
-                        case Comparison.Equals:
-                            if (comparable.CompareTo(rValue) == 0)
-                            {
-                                return true;
-                            }
-                            break;
-                        case Comparison.NotEquals:
-                            if (comparable.CompareTo(rValue) != 0)
-                            {
-                                return true;
-                            }
-                            break;
-                        case Comparison.Greater:
-                            if (comparable.CompareTo(rValue) > 0)
-                            {
-                                return true;
-                            }
-                            break;
-                        case Comparison.GreaterEquals:
-                            if (comparable.CompareTo(rValue) >= 0)
-                            {
-                                return true;
-                            }
-                            break;
-                        case Comparison.Less:
-                            if (comparable.CompareTo(rValue) < 0)
-                            {
-                                return true;
-                            }
-                            break;
-                        case Comparison.LessEquals:
-                            if (comparable.CompareTo(rValue) <= 0)
-                            {
-                                return true;
-                            }
-                            break;
-                    }
+                    return false;
                 }
-                else
-                {
-                    switch (ifAttribute.comparison)
-                    {
-                        case Comparison.Equals:
-                            if (lValue?.Equals(rValue) == true)
-                            {
-                                return true;
-                            }
-                            break;
-                        case Comparison.NotEquals:
-                            if (lValue?.Equals(rValue) == false)
-                            {
-                                return true;
-                            }
-                            break;
-                    }
-                }
+                lValue = sibling.GetValue();
+            }
 
-                if (lValue is IConvertible lConv && rValue is IConvertible rConv)
+            object rValue = ifAttribute.value;
+
+            if (lValue is IComparable comparable)
+            {
+                switch (ifAttribute.comparison)
                 {
-                    switch (ifAttribute.comparison)
-                    {
-                        case Comparison.FlagContains:
-                            if ((lConv.ToInt32(null) & rConv.ToInt32(null)) > 0)
-                            {
-                                return true;
-                            }
-                            break;
-                        case Comparison.FlagNotContains:
-                            if ((lConv.ToInt32(null) & rConv.ToInt32(null)) == 0)
-                            {
-                                return true;
-                            }
-                            break;
-                    }
+                    case Comparison.Equals:
+                        if (comparable.CompareTo(rValue) == 0)
+                        {
+                            return true;
+                        }
+                        break;
+                    case Comparison.NotEquals:
+                        if (comparable.CompareTo(rValue) != 0)
+                        {
+                            return true;
+                        }
+                        break;
+                    case Comparison.Greater:
+                        if (comparable.CompareTo(rValue) > 0)
+                        {
+                            return true;
+                        }
+                        break;
+                    case Comparison.GreaterEquals:
+                        if (comparable.CompareTo(rValue) >= 0)
+                        {
+                            return true;
+                        }
+                        break;
+                    case Comparison.Less:
+                        if (comparable.CompareTo(rValue) < 0)
+                        {
+                            return true;
+                        }
+                        break;
+                    case Comparison.LessEquals:
+                        if (comparable.CompareTo(rValue) <= 0)
+                        {
+                            return true;
+                        }
+                        break;
+                }
+            }
+            else
+            {
+                switch (ifAttribute.comparison)
+                {
+                    case Comparison.Equals:
+                        if (lValue?.Equals(rValue) == true)
+                        {
+                            return true;
+                        }
+                        break;
+                    case Comparison.NotEquals:
+                        if (lValue?.Equals(rValue) == false)
+                        {
+                            return true;
+                        }
+                        break;
+                }
+            }
+
+            if (lValue is IConvertible lConv && rValue is IConvertible rConv)
+            {
+                switch (ifAttribute.comparison)
+                {
+                    case Comparison.FlagContains:
+                        if ((lConv.ToInt32(null) & rConv.ToInt32(null)) > 0)
+                        {
+                            return true;
+                        }
+                        break;
+                    case Comparison.FlagNotContains:
+                        if ((lConv.ToInt32(null) & rConv.ToInt32(null)) == 0)
+                        {
+                            return true;
+                        }
+                        break;
                 }
             }
 
