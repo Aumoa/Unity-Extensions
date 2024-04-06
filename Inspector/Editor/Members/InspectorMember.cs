@@ -66,6 +66,11 @@ namespace Ayla.Inspector.Editor.Members
             return parent;
         }
 
+        public InspectorMember GetChild(string name)
+        {
+            return GetChildren().FirstOrDefault(p => p.name == name);
+        }
+
         public Object GetUnityObject()
         {
             return unityObject;

@@ -198,12 +198,40 @@ namespace Ayla.Inspector.Editor.Extensions
             return new InspectorSerializedObjectMember(parent, unityObject, serializedObject, pathName);
         }
 
-        public static IEnumerable<InspectorMember> GetInspectorChildren(this SerializedObject serializedObject, Object unityObject)
+        public static InspectorMember[] GetInspectorChildren(this object targetObject, Object unityObject, InspectorMember parent, IEnumerable<SerializedProperty> serializedProperties)
         {
-            return GetInspectorChildren(serializedObject.targetObject, unityObject, null, serializedObject.GetChildren());
+            var list = InternalGetInspectorChildren(targetObject, unityObject, parent, serializedProperties).ToList();
+            var orders = list
+                .Select(p => (member: p, attribute: p.GetCustomAttribute<OrderAttribute>()))
+                .Where(p => p.attribute != null)
+                .ToArray();
+
+            foreach (var (member, order) in orders)
+            {
+                if (order is OrderBeforeAttribute orderBefore)
+                {
+                    list.Remove(member);
+                    int indexOf = list.FindIndex(p => p.name == orderBefore.memberName);
+                    if (indexOf != -1)
+                    {
+                        list.Insert(indexOf, member);
+                    }
+                }
+                else if (order is OrderAfterAttribute orderAfter)
+                {
+                    list.Remove(member);
+                    int indexOf = list.FindIndex(p => p.name == orderAfter.memberName);
+                    if (indexOf != -1)
+                    {
+                        list.Insert(indexOf + 1, member);
+                    }
+                }
+            }
+
+            return list.ToArray();
         }
 
-        public static IEnumerable<InspectorMember> GetInspectorChildren(this object targetObject, Object unityObject, InspectorMember parent, IEnumerable<SerializedProperty> serializedProperties)
+        private static IEnumerable<InspectorMember> InternalGetInspectorChildren(this object targetObject, Object unityObject, InspectorMember parent, IEnumerable<SerializedProperty> serializedProperties)
         {
             if (targetObject == null)
             {
@@ -272,6 +300,23 @@ namespace Ayla.Inspector.Editor.Extensions
                                 methodInfo,
                                 memberInfo.Name,
                                 buttonAttribute
+                            );
+
+                            continue;
+                        }
+                    }
+
+                    var customAttribute = memberInfo.GetCustomAttribute<CustomInspectorAttribute>();
+                    if (customAttribute != null)
+                    {
+                        if (memberInfo is MethodInfo methodInfo)
+                        {
+                            yield return new InspectorCustomMember(
+                                parent,
+                                unityObject,
+                                methodInfo,
+                                methodInfo.Name,
+                                customAttribute
                             );
 
                             continue;
