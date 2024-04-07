@@ -99,18 +99,24 @@ namespace Ayla.Inspector.Editor
         {
             Current = this;
 
-            UpdateAndDrawInspectorGUI(serializedObject, () =>
+            bool changed = UpdateAndDrawInspectorGUI(serializedObject, () =>
             {
                 // get starting position.
                 var rc = EditorGUILayout.GetControlRect();
                 Vector2 position = new(rc.x, rc.y);
                 inspectorMember ??= serializedObject.GetInspector(serializedObject.targetObject, null, string.Empty);
-                inspectorMember.OnUpdateInspectorGUI();
                 foreach (var child in inspectorMember.GetChildren())
                 {
                     position = OnGUI_Element(child, position, true);
                 }
             });
+
+            if (changed)
+            {
+                // do refresh.
+                inspectorMember = null;
+                s_ReorderableLists.Clear();
+            }
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -122,11 +128,11 @@ namespace Ayla.Inspector.Editor
         private readonly Dictionary<string, bool> s_IsExpanded = new();
         private readonly Dictionary<string, ReorderableList> s_ReorderableLists = new();
 
-        private static void UpdateAndDrawInspectorGUI(SerializedObject serializedObject, Action drawer)
+        private static bool UpdateAndDrawInspectorGUI(SerializedObject serializedObject, Action drawer)
         {
             serializedObject.Update();
             drawer?.Invoke();
-            serializedObject.ApplyModifiedProperties();
+            return serializedObject.ApplyModifiedProperties();
         }
 
         public static InspectorDrawer Current { get; private set; }
