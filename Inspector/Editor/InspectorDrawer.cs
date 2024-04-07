@@ -105,6 +105,7 @@ namespace Ayla.Inspector.Editor
                 var rc = EditorGUILayout.GetControlRect();
                 Vector2 position = new(rc.x, rc.y);
                 inspectorMember ??= serializedObject.GetInspector(serializedObject.targetObject, null, string.Empty);
+                inspectorMember.OnUpdateInspectorGUI();
                 foreach (var child in inspectorMember.GetChildren())
                 {
                     position = OnGUI_Element(child, position, true);

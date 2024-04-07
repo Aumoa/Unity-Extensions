@@ -17,7 +17,8 @@ namespace Ayla.Inspector.Editor.Extensions
         public enum InspectorVisibility
         {
             None,
-            NonSerializedField
+            NonSerializedField,
+            PropertyField
         }
 
         private static string NormalizeUnityPath(this string path)
@@ -338,6 +339,21 @@ namespace Ayla.Inspector.Editor.Extensions
                             );
                         }
                     }
+
+                    if (inspectorVisibility == InspectorVisibility.PropertyField)
+                    {
+                        if (memberInfo is PropertyInfo propertyInfo)
+                        {
+                            yield return new InspectorNativePropertyMember(
+                                parent,
+                                unityObject,
+                                () => propertyInfo.GetValue(targetObject),
+                                value => propertyInfo.SetValue(targetObject, value),
+                                propertyInfo,
+                                memberInfo.Name
+                            );
+                        }
+                    }
                 }
             }
         }
@@ -453,6 +469,11 @@ namespace Ayla.Inspector.Editor.Extensions
                 {
                     return InspectorVisibility.NonSerializedField;
                 }
+            }
+
+            if (memberInfo is PropertyInfo propertyInfo)
+            {
+                return InspectorVisibility.PropertyField;
             }
 
             return InspectorVisibility.None;

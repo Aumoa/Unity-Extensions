@@ -13,17 +13,17 @@ using Object = UnityEngine.Object;
 
 namespace Ayla.Inspector.Editor.Members
 {
-    public class InspectorNonSerializedFieldMember : InspectorMember
+    public class InspectorNativePropertyMember : InspectorMember
     {
         private NativePropertyDrawer drawer;
         private InspectorMember[] cachedChildren;
-        private FieldInfo fieldInfo;
+        private PropertyInfo propertyInfo;
 
-        public InspectorNonSerializedFieldMember(InspectorMember parent, Object unityObject, Func<object> getter, Action<object> setter, FieldInfo fieldInfo, string pathName)
-            : base(parent, unityObject, getter, setter, fieldInfo, pathName)
+        public InspectorNativePropertyMember(InspectorMember parent, Object unityObject, Func<object> getter, Action<object> setter, PropertyInfo propertyInfo, string pathName)
+            : base(parent, unityObject, getter, setter, propertyInfo, pathName)
         {
-            this.fieldInfo = fieldInfo;
-            drawer = ScriptAttributeUtility.InstantiateNativePropertyDrawer(fieldInfo.FieldType);
+            this.propertyInfo = propertyInfo;
+            drawer = ScriptAttributeUtility.InstantiateNativePropertyDrawer(propertyInfo.PropertyType);
         }
 
         private void CacheChildren()
@@ -47,7 +47,7 @@ namespace Ayla.Inspector.Editor.Members
 
         public override ReorderableList GenerateReorderableList()
         {
-            var list = new ReorderableList((IList)GetValue(), fieldInfo.FieldType, true, false, true, true)
+            var list = new ReorderableList((IList)GetValue(), propertyInfo.PropertyType, true, false, true, true)
             {
                 headerHeight = 0
             };
@@ -85,7 +85,7 @@ namespace Ayla.Inspector.Editor.Members
 
         public override Type GetMemberType()
         {
-            return fieldInfo.FieldType;
+            return propertyInfo.PropertyType;
         }
 
         public InspectorMember[] children
@@ -102,9 +102,9 @@ namespace Ayla.Inspector.Editor.Members
 
         public override IEnumerable<InspectorMember> GetChildren() => children;
 
-        public override string name => fieldInfo.Name;
+        public override string name => propertyInfo.Name;
 
-        public override bool isEditable => !fieldInfo.IsInitOnly;
+        public override bool isEditable => propertyInfo.GetSetMethod() != null;
 
         public override bool isExpanded
         {
@@ -114,6 +114,8 @@ namespace Ayla.Inspector.Editor.Members
 
         public override bool isExpandable => GetMemberType().IsExpandable();
 
-        public override bool isList => fieldInfo.FieldType == typeof(IList) || fieldInfo.FieldType.IsSubclassOf(typeof(IList));
+        public override bool isList => propertyInfo.PropertyType == typeof(IList) || propertyInfo.PropertyType.IsSubclassOf(typeof(IList));
+
+        public override bool isVisible => false;
     }
 }

@@ -19,7 +19,6 @@ namespace Ayla.Inspector.Editor.Members
             : base(parent, unityObject, () => serializedObject.targetObject, null, null, pathName)
         {
             this.serializedObject = serializedObject;
-            CacheChildren();
         }
 
         public override string name => serializedObject.targetObject.name;
@@ -44,6 +43,10 @@ namespace Ayla.Inspector.Editor.Members
 
         public override IEnumerable<InspectorMember> GetChildren()
         {
+            if (cachedChildren == null)
+            {
+                CacheChildren();
+            }
             return cachedChildren;
         }
 

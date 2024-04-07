@@ -46,6 +46,17 @@ namespace Ayla.Inspector.Editor.Members
             return $"{propertyPath} ({getter?.Invoke()})";
         }
 
+        public virtual void OnUpdateInspectorGUI()
+        {
+            if (isVisible)
+            {
+                foreach (var child in GetChildren())
+                {
+                    child.OnUpdateInspectorGUI();
+                }
+            }
+        }
+
         public abstract void OnGUI(Rect rect, GUIContent label);
 
         public abstract float GetHeight();

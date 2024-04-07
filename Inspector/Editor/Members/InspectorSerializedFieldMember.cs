@@ -35,7 +35,6 @@ namespace Ayla.Inspector.Editor.Members
             : base(parent, unityObject, getter, setter, memberInfo, pathName)
         {
             this.serializedProperty = serializedProperty;
-            CacheChildren();
         }
 
         private void CacheChildren()
