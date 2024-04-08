@@ -46,7 +46,9 @@ namespace Ayla.Inspector.Editor.Members
             }
 
             var ownedObject = GetParent().GetValue();
+            GUILayout.BeginArea(rect, EditorStyles.inspectorDefaultMargins);
             methodInfo.Invoke(ownedObject, new object[] { rect, label });
+            GUILayout.EndArea();
         }
 
         public override float GetHeight()
