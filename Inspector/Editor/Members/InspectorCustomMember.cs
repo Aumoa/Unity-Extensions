@@ -15,6 +15,7 @@ namespace Ayla.Inspector.Editor.Members
         private readonly MethodInfo methodInfo;
         private readonly CustomInspectorAttribute attribute;
         private readonly bool isMismatch;
+        private readonly int paramsCount;
 
         public InspectorCustomMember(InspectorMember parent, Object unityObject, MethodInfo methodInfo, string pathName, CustomInspectorAttribute attribute)
             : base(parent, unityObject, null, null, methodInfo, pathName)
@@ -23,19 +24,28 @@ namespace Ayla.Inspector.Editor.Members
             this.attribute = attribute;
 
             var parameters = methodInfo.GetParameters();
-            if (parameters.Length != 2)
+            if (parameters.Length >= 3)
             {
-                Debug.LogErrorFormat("Signature error: parameter must be accept (Rect position, GUIContent label).");
+                Debug.LogErrorFormat("Signature error: parameter must be accept (), (Rect position), (Rect position, GUIContent label).");
                 isMismatch = true;
                 return;
             }
 
-            if (parameters[0].ParameterType != typeof(Rect) || parameters[1].ParameterType != typeof(GUIContent))
+            if (parameters.Length >= 1 && parameters[0].ParameterType != typeof(Rect))
             {
-                Debug.LogErrorFormat("Signature error: parameter must be accept (Rect position, GUIContent label).");
+                Debug.LogErrorFormat("Signature error: parameter must be accept (), (Rect position), (Rect position, GUIContent label).");
                 isMismatch = true;
                 return;
             }
+
+            if (parameters.Length >= 2 && parameters[1].ParameterType != typeof(GUIContent))
+            {
+                Debug.LogErrorFormat("Signature error: parameter must be accept (), (Rect position), (Rect position, GUIContent label).");
+                isMismatch = true;
+                return;
+            }
+
+            paramsCount = parameters.Length;
         }
 
         public override void OnGUI(Rect rect, GUIContent label)
@@ -47,7 +57,14 @@ namespace Ayla.Inspector.Editor.Members
 
             var ownedObject = GetParent().GetValue();
             GUILayout.BeginArea(rect, EditorStyles.inspectorDefaultMargins);
-            methodInfo.Invoke(ownedObject, new object[] { rect, label });
+            var parameters = paramsCount switch
+            {
+                0 => Array.Empty<object>(),
+                1 => new object[] { rect },
+                2 => new object[] { rect, label },
+                _ => throw new InvalidOperationException("Unexpected error")
+            };
+            methodInfo.Invoke(ownedObject, parameters);
             GUILayout.EndArea();
         }
 
