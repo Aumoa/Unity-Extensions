@@ -11,29 +11,9 @@ namespace Ayla.Inspector.Editor.Utilities
     public static class ScriptAttributeUtility
     {
         private static bool s_Initialized;
-        private static readonly Dictionary<Type, (Type drawerType, bool useForChildren)> s_PropertyDrawerCache;
-        private static readonly Dictionary<Type, (Type drawerType, bool useForChildren)> s_NativePropertyDrawerCache;
+        private static readonly Dictionary<Type, (Type drawerType, bool useForChildren)> s_PropertyDrawerCache = new();
+        private static readonly Dictionary<Type, (Type drawerType, bool useForChildren)> s_NativePropertyDrawerCache = new();
 
-        static ScriptAttributeUtility()
-        {
-            s_PropertyDrawerCache = new Dictionary<Type, (Type drawerType, bool useForChildren)>();
-            s_NativePropertyDrawerCache = new Dictionary<Type, (Type drawerType, bool useForChildren)>();
-
-#if UNITY_EDITOR
-            AssemblyReloadEvents.beforeAssemblyReload += () =>
-            {
-                lock (s_PropertyDrawerCache)
-                lock (s_NativePropertyDrawerCache)
-                {
-                    s_PropertyDrawerCache.Clear();
-                    s_NativePropertyDrawerCache.Clear();
-                    s_Initialized = false;
-                }
-            };
-#endif
-        }
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
         private static void InitializeComponents()
         {
             if (s_Initialized)
@@ -94,6 +74,19 @@ namespace Ayla.Inspector.Editor.Utilities
                     }
                 }
 
+#if UNITY_EDITOR
+                AssemblyReloadEvents.beforeAssemblyReload += () =>
+                {
+                    lock (s_PropertyDrawerCache)
+                    lock (s_NativePropertyDrawerCache)
+                    {
+                        s_PropertyDrawerCache.Clear();
+                        s_NativePropertyDrawerCache.Clear();
+                        s_Initialized = false;
+                    }
+                };
+#endif
+
                 s_Initialized = true;
             }
         }
@@ -106,6 +99,8 @@ namespace Ayla.Inspector.Editor.Utilities
 
         private static object InternalInstantiateDrawer(in Dictionary<Type, (Type drawerType, bool useForChildren)> drawerCache, Type targetType)
         {
+            InitializeComponents();
+
             lock (drawerCache)
             {
                 if (drawerCache.TryGetValue(targetType, out var cachedInfo) == false)

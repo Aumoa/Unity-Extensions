@@ -368,16 +368,20 @@ namespace Ayla.Inspector.Editor.Extensions
                 | BindingFlags.InvokeMethod
                 | BindingFlags.DeclaredOnly;
 
+            var stack = new Stack<Type>();
             while (baseType != typeof(object) && baseType != null)
             {
-                inTypeChangeCallback?.Invoke(baseType);
+                stack.Push(baseType);
+                baseType = baseType.BaseType;
+            }
 
-                foreach (var member in baseType.GetMembers(bindingFlags))
+            while (stack.TryPop(out var pop))
+            {
+                inTypeChangeCallback?.Invoke(pop);
+                foreach (var member in pop.GetMembers(bindingFlags))
                 {
                     yield return member;
                 }
-
-                baseType = baseType.BaseType;
             }
         }
 
@@ -440,7 +444,12 @@ namespace Ayla.Inspector.Editor.Extensions
                 return InspectorVisibility.NonSerializedField;
             }
 
-            if (memberInfo.GetCustomAttribute<NonSerializeFieldAttribute>() != null)
+            if (memberInfo is PropertyInfo)
+            {
+                return InspectorVisibility.PropertyField;
+            }
+
+            if (memberInfo.GetCustomAttribute<ShowNativeMemberAttribute>() != null)
             {
                 return InspectorVisibility.NonSerializedField;
             }
@@ -469,11 +478,6 @@ namespace Ayla.Inspector.Editor.Extensions
                 {
                     return InspectorVisibility.NonSerializedField;
                 }
-            }
-
-            if (memberInfo is PropertyInfo propertyInfo)
-            {
-                return InspectorVisibility.PropertyField;
             }
 
             return InspectorVisibility.None;

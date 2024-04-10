@@ -104,6 +104,11 @@ namespace Ayla.Inspector.Editor.Members
             return memberInfo?.GetCustomAttributes<T>().ToArray() ?? Array.Empty<T>();
         }
 
+        public bool HasCustomAttribute<T>() where T : Attribute
+        {
+            return GetCustomAttribute<T>() != null;
+        }
+
         public abstract string name { get; }
 
         public virtual string displayName

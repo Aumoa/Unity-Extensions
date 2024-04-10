@@ -6,6 +6,7 @@ using System.Reflection;
 using Ayla.Inspector.Editor.Drawer;
 using Ayla.Inspector.Editor.Extensions;
 using Ayla.Inspector.Editor.Utilities;
+using Ayla.Inspector.Meta;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
@@ -116,6 +117,6 @@ namespace Ayla.Inspector.Editor.Members
 
         public override bool isList => propertyInfo.PropertyType == typeof(IList) || propertyInfo.PropertyType.IsSubclassOf(typeof(IList));
 
-        public override bool isVisible => false;
+        public override bool isVisible => HasCustomAttribute<ShowNativeMemberAttribute>();
     }
 }
