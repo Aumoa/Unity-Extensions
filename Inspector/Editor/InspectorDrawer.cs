@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Ayla.Inspector.Editor.Extensions;
 using Ayla.Inspector.Editor.Members;
+using Ayla.Inspector.Runtime.Utilities.Scopes;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
@@ -61,7 +62,7 @@ namespace Ayla.Inspector.Editor
                 }
                 else
                 {
-                    using var indentScope = new EditorGUI.IndentLevelScope();
+                    using var indentScope = new IndentLevelScope(level: 1);
                     foreach (var child in aylaMember.GetChildren())
                     {
                         position = OnGUI_Element(child, position, isLayout);
@@ -89,7 +90,9 @@ namespace Ayla.Inspector.Editor
                 }
                 else
                 {
-                    height += aylaMember.GetChildren().Select(p => GetHeight_Element(p) + EditorGUIUtility.standardVerticalSpacing).Sum();
+                    height += aylaMember.GetChildren()
+                        .Select(p => GetHeight_Element(p) + EditorGUIUtility.standardVerticalSpacing)
+                        .Sum() - EditorGUIUtility.standardVerticalSpacing;
                 }
             }
             return height;

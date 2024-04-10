@@ -55,6 +55,8 @@ namespace Ayla.Inspector.Editor.Members
                 return;
             }
 
+            rect = EditorGUI.IndentedRect(rect);
+
             var ownedObject = GetParent().GetValue();
             GUILayout.BeginArea(rect, EditorStyles.inspectorDefaultMargins);
             var parameters = paramsCount switch
