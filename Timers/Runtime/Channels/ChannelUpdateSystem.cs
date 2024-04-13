@@ -7,12 +7,16 @@ namespace Ayla.Timers.Runtime.Channels
 {
     public static class ChannelUpdateSystem
     {
-        private static readonly HashSet<ChannelMixer> s_Mixers = new();
+        private static readonly HashSet<ChannelMixerUpdater> s_MixerUpdaters = new();
 
         private struct TimingUpdateRunner
         {
             public static void DispatchUpdateChannels()
             {
+                foreach (var component in s_MixerUpdaters)
+                {
+                    component.DispatchUpdateChannel();
+                }
             }
         }
 
@@ -29,12 +33,17 @@ namespace Ayla.Timers.Runtime.Channels
             });
             PlayerLoop.SetPlayerLoop(playerLoop);
 
-            s_Mixers.RemoveWhere(p => p == null);
+            s_MixerUpdaters.RemoveWhere(p => p == null);
         }
 
-        public static void RegisterMixer(ChannelMixer mixer)
+        internal static void RegisterUpdater(ChannelMixerUpdater component)
         {
-            s_Mixers.Add(mixer);
+            s_MixerUpdaters.Add(component);
+        }
+
+        internal static void UnregisterUpdater(ChannelMixerUpdater component)
+        {
+            s_MixerUpdaters.Remove(component);
         }
     }
 }

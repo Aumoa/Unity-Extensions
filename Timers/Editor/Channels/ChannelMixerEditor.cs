@@ -54,7 +54,7 @@ namespace Ayla.Timers.Editor.Channels
 
                 using (LayoutUtility.HorizontalScope())
                 {
-                    createChildName = EditorGUILayout.TextField(createChildName);
+                    createChildName = EditorGUILayout.TextField(createChildName, GUILayout.Width(EditorGUIUtility.labelWidth));
                     if (GUILayout.Button("Create Child For") || EditorUtility.IsEnterKeyPressed())
                     {
                         var channel = channels[namesIndex];
@@ -69,7 +69,7 @@ namespace Ayla.Timers.Editor.Channels
         {
             using (LayoutUtility.HorizontalScope())
             {
-                const float labelWidth = 200.0f;
+                float labelWidth = EditorGUIUtility.labelWidth;
                 float indentWidth = 11.0f * indentLevel;
                 if (indentWidth > 0)
                 {
@@ -79,7 +79,16 @@ namespace Ayla.Timers.Editor.Channels
                 GUIStyle skin = bold ? EditorStyles.boldLabel : EditorStyles.label;
                 GUILayout.Label(channel.name, skin, GUILayout.Width(labelWidth - indentWidth));
                 GUILayout.Label($"{channel.scale:F2} ({channel.scaleSelf:F2})", GUILayout.Width(80.0f));
-                channel.scaleSelf = (float)EditorGUILayout.Slider((float)channel.scaleSelf, 0.0f, 10.0f);
+
+                using (LayoutUtility.HorizontalScope())
+                {
+                    channel.scaleSelf = (float)EditorGUILayout.Slider((float)channel.scaleSelf, 0.0f, 10.0f);
+                    if (Application.isPlaying)
+                    {
+                        GUILayout.Label(channel.time.ToString("F2"));
+                        GUILayout.Label($"({channel.deltaTime:F2})");
+                    }
+                }
 
                 if (canRemove)
                 {

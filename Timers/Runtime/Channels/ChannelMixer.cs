@@ -15,11 +15,6 @@ namespace Ayla.Timers.Runtime.Channels
 
         public Channel masterChannel => m_MasterChannel;
 
-        private void Awake()
-        {
-            ChannelUpdateSystem.RegisterMixer(this);
-        }
-
         public Channel[] channels
         {
             get
@@ -39,6 +34,11 @@ namespace Ayla.Timers.Runtime.Channels
                 AddRecursive(m_MasterChannel);
                 return m_ChannelsCache.ToArray();
             }
+        }
+
+        internal void UpdateTimer(double deltaTime)
+        {
+            masterChannel.UpdateTimer(deltaTime);
         }
 
 #if UNITY_EDITOR
