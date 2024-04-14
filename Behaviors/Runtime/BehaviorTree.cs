@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using Ayla.Behaviors.Runtime.Tasks;
 using Ayla.Behaviors.Runtime.Utilities;
-using Ayla.Inspector.Runtime.Utilities.Scopes;
+using Ayla.Inspector.Runtime.Utilities;
 using Ayla.Inspector.SpecialCase;
 using UnityEditor;
 using UnityEngine;
@@ -100,7 +100,7 @@ namespace Ayla.Behaviors.Runtime
         {
             if (HasError(out var errorId))
             {
-                using var scope = new ColorScope(Color.red);
+                using var scope = Scopes.ColorScope(Color.red);
                 position.height = EditorGUIUtility.singleLineHeight;
                 GUI.Label(position, "Invalidate");
                 position.y += position.height + EditorGUIUtility.standardVerticalSpacing;
@@ -113,7 +113,7 @@ namespace Ayla.Behaviors.Runtime
             }
             else
             {
-                using var scope = new ColorScope(Color.green);
+                using var scope = Scopes.ColorScope(Color.green);
                 GUI.Label(position, "Validate");
             }
         }

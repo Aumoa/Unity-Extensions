@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Ayla.Inspector.Editor.Extensions;
 using Ayla.Inspector.Editor.Members;
-using Ayla.Inspector.Runtime.Utilities.Scopes;
+using Ayla.Inspector.Runtime.Utilities;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
@@ -62,8 +62,8 @@ namespace Ayla.Inspector.Editor
                 }
                 else
                 {
-                    using var indentScope = new IndentLevelScope(level: 1);
                     foreach (var child in aylaMember.GetChildren())
+                    using var indentScope = Scopes.IndentLevelScope(inlineAttribute == null ? 1 : 0);
                     {
                         position = OnGUI_Element(child, position, isLayout);
                     }

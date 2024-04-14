@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Ayla.Inspector.Runtime.Utilities.Scopes;
+using Ayla.Inspector.Runtime.Utilities;
 using Ayla.Inspector.SpecialCase;
 using UnityEditor;
 using UnityEngine;
@@ -99,7 +99,7 @@ namespace Ayla.Behaviors.Runtime.Tasks
         {
             if (HasError(out var errorId))
             {
-                using var scope = new ColorScope(Color.red);
+                using var scope = Scopes.ColorScope(Color.red);
                 GUILayout.Label("Invalidate");
                 switch (errorId)
                 {
@@ -113,7 +113,7 @@ namespace Ayla.Behaviors.Runtime.Tasks
             }
             else
             {
-                using var scope = new ColorScope(Color.green);
+                using var scope = Scopes.ColorScope(Color.green);
                 GUILayout.Label("Validate");
             }
         }
