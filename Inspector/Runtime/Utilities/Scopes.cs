@@ -47,5 +47,33 @@ namespace Ayla.Inspector.Runtime.Utilities
         {
             return new IndentLevelScopeBuilder(increaseLevel);
         }
+
+        public readonly struct HorizontalScopeBuilder : IDisposable
+        {
+            public readonly void Dispose()
+            {
+                GUILayout.EndHorizontal();
+            }
+        }
+
+        public static HorizontalScopeBuilder HorizontalScope()
+        {
+            GUILayout.BeginHorizontal();
+            return default;
+        }
+
+        public readonly struct VerticalScopeBuilder : IDisposable
+        {
+            public readonly void Dispose()
+            {
+                GUILayout.EndVertical();
+            }
+        }
+
+        public static VerticalScopeBuilder VerticalScope()
+        {
+            GUILayout.BeginVertical();
+            return default;
+        }
     }
 }
