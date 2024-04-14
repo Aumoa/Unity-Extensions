@@ -1,0 +1,16 @@
+{
+	"name": "com.aylaextensions.inspector",
+	"displayName": "AylaInspector",
+	"author": {
+		"name": "Aumoa",
+		"url": "https://github.com/Aumoa"
+	},
+	"version": "0.1.0",
+	"unity": "2023.1.12",
+	"description": "High-performance Inspector Utility",
+	"keywords": ["Inspector"],
+	"license": "MIT",
+	"category": "Inspector",
+	"dependencies": {
+	}
+}
