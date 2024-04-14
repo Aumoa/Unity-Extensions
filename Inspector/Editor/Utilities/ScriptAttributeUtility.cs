@@ -8,11 +8,15 @@ using UnityEngine;
 
 namespace Ayla.Inspector.Editor.Utilities
 {
-    public static class ScriptAttributeUtility
+    internal static class ScriptAttributeUtility
     {
         private static bool s_Initialized;
+
         private static readonly Dictionary<Type, (Type drawerType, bool useForChildren)> s_PropertyDrawerCache = new();
         private static readonly Dictionary<Type, (Type drawerType, bool useForChildren)> s_NativePropertyDrawerCache = new();
+        private static readonly Dictionary<Type, (Type drawerType, bool useForChildren)> s_DecoratorDrawerCache = new();
+
+        private static Action<DecoratorDrawer, PropertyAttribute> s_DecoratorDrawerAssign;
 
         private static void InitializeComponents()
         {
@@ -23,6 +27,7 @@ namespace Ayla.Inspector.Editor.Utilities
 
             lock (s_PropertyDrawerCache)
             lock (s_NativePropertyDrawerCache)
+            lock (s_DecoratorDrawerCache)
             {
                 if (s_Initialized)
                 {
@@ -31,9 +36,12 @@ namespace Ayla.Inspector.Editor.Utilities
 
                 s_PropertyDrawerCache.Clear();
                 s_NativePropertyDrawerCache.Clear();
+                s_DecoratorDrawerCache.Clear();
 
-                FieldInfo m_Type = typeof(CustomPropertyDrawer).GetField("m_Type", BindingFlags.Instance | BindingFlags.NonPublic);
-                FieldInfo m_UseForChildren = typeof(CustomPropertyDrawer).GetField("m_UseForChildren", BindingFlags.Instance | BindingFlags.NonPublic);
+                const BindingFlags k_BindingFlags = BindingFlags.Instance | BindingFlags.NonPublic;
+
+                var m_Type = ReflectionUtility.GetField<CustomPropertyDrawer, Type>("m_Type", k_BindingFlags);
+                var m_UseForChildren = ReflectionUtility.GetField<CustomPropertyDrawer, bool>("m_UseForChildren", k_BindingFlags);
 
                 foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
                 {
@@ -48,8 +56,8 @@ namespace Ayla.Inspector.Editor.Utilities
                                 {
                                     foreach (var drawerAttr in isDrawer)
                                     {
-                                        var targetType = (Type)m_Type.GetValue(drawerAttr);
-                                        var useForChildren = (bool)m_UseForChildren.GetValue(drawerAttr);
+                                        var targetType = m_Type(drawerAttr);
+                                        var useForChildren = m_UseForChildren(drawerAttr);
                                         s_PropertyDrawerCache.TryAdd(targetType, (type, useForChildren));
                                     }
                                 }
@@ -67,6 +75,19 @@ namespace Ayla.Inspector.Editor.Utilities
                                     }
                                 }
                             }
+                            else if (type == typeof(DecoratorDrawer) || type.IsSubclassOf(typeof(DecoratorDrawer)))
+                            {
+                                var isDrawer = type.GetCustomAttributes<CustomPropertyDrawer>();
+                                if (isDrawer?.Any() == true)
+                                {
+                                    foreach (var drawerAttr in isDrawer)
+                                    {
+                                        var targetType = m_Type(drawerAttr);
+                                        var useForChildren = m_UseForChildren(drawerAttr);
+                                        s_DecoratorDrawerCache.TryAdd(targetType, (type, useForChildren));
+                                    }
+                                }
+                            }
                         }
                         catch
                         {
@@ -74,11 +95,14 @@ namespace Ayla.Inspector.Editor.Utilities
                     }
                 }
 
+                s_DecoratorDrawerAssign = ReflectionUtility.SetField<DecoratorDrawer, PropertyAttribute>("m_Attribute", k_BindingFlags);
+
 #if UNITY_EDITOR
                 AssemblyReloadEvents.beforeAssemblyReload += () =>
                 {
                     lock (s_PropertyDrawerCache)
                     lock (s_NativePropertyDrawerCache)
+                    lock (s_DecoratorDrawerCache)
                     {
                         s_PropertyDrawerCache.Clear();
                         s_NativePropertyDrawerCache.Clear();
@@ -96,6 +120,16 @@ namespace Ayla.Inspector.Editor.Utilities
 
         public static NativePropertyDrawer InstantiateNativePropertyDrawer(Type targetType)
             => InternalInstantiateDrawer(in s_NativePropertyDrawerCache, targetType) as NativePropertyDrawer;
+
+        public static DecoratorDrawer InstantiateDecoratorDrawer(PropertyAttribute propertyAttribute)
+        {
+            var drawer = InternalInstantiateDrawer(in s_DecoratorDrawerCache, propertyAttribute.GetType()) as DecoratorDrawer;
+            if (drawer != null)
+            {
+                s_DecoratorDrawerAssign(drawer, propertyAttribute);
+            }
+            return drawer;
+        }
 
         private static object InternalInstantiateDrawer(in Dictionary<Type, (Type drawerType, bool useForChildren)> drawerCache, Type targetType)
         {

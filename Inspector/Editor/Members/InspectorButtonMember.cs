@@ -43,6 +43,10 @@ namespace Ayla.Inspector.Editor.Members
 
         public override void OnGUI(Rect rect, GUIContent label)
         {
+            float spacing = InspectorDrawer.EvaluateDecorators(rect, this, false, true);
+            rect.y += spacing;
+            rect.height -= spacing;
+
             if (GUI.Button(rect, label))
             {
                 Invoke();
@@ -57,7 +61,7 @@ namespace Ayla.Inspector.Editor.Members
                 return EditorGUIUtility.singleLineHeight;
             }
 
-            return height;
+            return height + InspectorDrawer.EvaluateDecorators(default, this, false, false);
         }
 
         public override IEnumerable<InspectorMember> GetChildren()

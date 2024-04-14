@@ -36,13 +36,18 @@ namespace Ayla.Inspector.Editor.Members
         {
             if (isVisible)
             {
-                return drawer?.GetPropertyHeight(this, label) ?? 0;
+                float spacing = drawer?.GetPropertyHeight(this, label) ?? 0;
+                return spacing + InspectorDrawer.EvaluateDecorators(default, this, false, false);
             }
             return 0;
         }
 
         public override void OnGUI(Rect rect, GUIContent label)
         {
+            float spacing = InspectorDrawer.EvaluateDecorators(rect, this, false, true);
+            rect.y += spacing;
+            rect.height -= spacing;
+
             drawer?.OnGUI(rect, this, label);
         }
 

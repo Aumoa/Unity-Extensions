@@ -1,6 +1,4 @@
-﻿// Copyright 2020-2023 Aumoa.lib. All right reserved.
-
-using System;
+﻿using System;
 
 namespace Ayla.Inspector.Meta
 {
@@ -9,7 +7,7 @@ namespace Ayla.Inspector.Meta
     {
         public string labelName { get; private set; }
 
-        public LabelAttribute(string name)
+        public LabelAttribute(string name = null)
         {
             labelName = name;
         }

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Ayla.Inspector.Editor.Extensions;
 using Ayla.Inspector.Editor.Members;
+using Ayla.Inspector.Editor.Utilities;
+using Ayla.Inspector.Meta;
 using Ayla.Inspector.Runtime.Utilities;
 using UnityEditor;
 using UnityEditorInternal;
@@ -17,9 +19,9 @@ namespace Ayla.Inspector.Editor
     {
         private InspectorSerializedObjectMember inspectorMember;
 
-        public static Vector2 OnGUI_Element(InspectorMember aylaMember, Vector2 position, bool isLayout)
+        public static Vector2 OnGUI_Element(InspectorMember inspectorMember, Vector2 position, bool isLayout)
         {
-            if (aylaMember.isVisible == false)
+            if (inspectorMember.isVisible == false)
             {
                 return position;
             }
@@ -29,25 +31,34 @@ namespace Ayla.Inspector.Editor
                 x = position.x,
                 y = position.y,
                 width = EditorGUIUtility.currentViewWidth - position.x,
-                height = aylaMember.GetHeight()
+                height = inspectorMember.GetHeight()
             };
 
-            bool isDisabled = !aylaMember.isEditable || !aylaMember.isEnabled;
+            bool isDisabled = !inspectorMember.isEditable || !inspectorMember.isEnabled;
             using var disabledScope = new EditorGUI.DisabledScope(disabled: isDisabled);
-            aylaMember.OnGUI(rect, aylaMember.label);
-
-            float spacing = rect.height + EditorGUIUtility.standardVerticalSpacing;
-            if (isLayout && aylaMember is not InspectorScriptMember)
+            var inlineAttribute = inspectorMember.GetCustomAttribute<InlineAttribute>();
+            if (inlineAttribute != null)
             {
-                EditorGUILayout.Space(spacing);
+                position.y += EvaluateDecorators(rect, inspectorMember, isLayout, true);
             }
-            position.y += spacing;
-
-            if (aylaMember.isExpanded)
+            else
             {
-                if (aylaMember.isList)
+                float spacing = EditorGUIUtility.standardVerticalSpacing;
+                inspectorMember.OnGUI(rect, inspectorMember.label);
+                spacing += rect.height;
+
+                if (isLayout && inspectorMember is not InspectorScriptMember)
                 {
-                    var list = GetReorderableList(aylaMember);
+                    EditorGUILayout.Space(spacing);
+                }
+                position.y += spacing;
+            }
+
+            if (inspectorMember.isExpanded || inlineAttribute != null)
+            {
+                if (inspectorMember.isList)
+                {
+                    var list = GetReorderableList(inspectorMember);
                     rect.y = position.y;
                     rect.height = list.GetHeight();
                     list.DoList(rect);
@@ -62,8 +73,8 @@ namespace Ayla.Inspector.Editor
                 }
                 else
                 {
-                    foreach (var child in aylaMember.GetChildren())
                     using var indentScope = Scopes.IndentLevelScope(inlineAttribute == null ? 1 : 0);
+                    foreach (var child in inspectorMember.GetChildren())
                     {
                         position = OnGUI_Element(child, position, isLayout);
                     }
@@ -120,6 +131,32 @@ namespace Ayla.Inspector.Editor
                 inspectorMember = null;
                 s_ReorderableLists.Clear();
             }
+        }
+
+        public static float EvaluateDecorators(Rect position, InspectorMember inspectorMember, bool isLayout, bool doRender)
+        {
+            float spacing = 0;
+            foreach (var unityAttribute in inspectorMember.GetCustomAttributes<PropertyAttribute>())
+            {
+                var drawer = ScriptAttributeUtility.InstantiateDecoratorDrawer(unityAttribute);
+                if (drawer != null)
+                {
+                    position.height = drawer.GetHeight();
+                    if (doRender)
+                    {
+                        drawer.OnGUI(position);
+                    }
+
+                    position.y += position.height;
+                    if (isLayout && doRender)
+                    {
+                        EditorGUILayout.Space(position.height);
+                    }
+                    spacing += position.height;
+                }
+            }
+
+            return spacing;
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
