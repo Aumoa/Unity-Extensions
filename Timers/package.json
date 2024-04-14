@@ -1,16 +1,16 @@
 {
-	"name": "com.aylaextensions.animators",
-	"displayName": "AylaAnimators",
+	"name": "com.aylaextensions.timers",
+	"displayName": "AylaTimers",
 	"author": {
 		"name": "Aumoa",
 		"url": "https://github.com/Aumoa"
 	},
 	"version": "0.1.0",
 	"unity": "2018.4",
-	"description": "Animator Utilities",
-	"keywords": ["Animator"],
+	"description": "Timing Utility",
+	"keywords": ["Time", "Timer"],
 	"license": "MIT",
-	"category": "Animator",
+	"category": "Time",
 	"dependencies": {
 		"com.aylaextensions.inspector": "git@github.com:Aumoa/Unity-Extensions.git?path=Inspector"
 	}

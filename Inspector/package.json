@@ -12,6 +12,5 @@
 	"license": "MIT",
 	"category": "Inspector",
 	"dependencies": {
-		"com.aylaextensions.inspector": "git@github.com:Aumoa/Unity-Extensions.git?path=Inspector"
 	}
 }
