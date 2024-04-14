@@ -6,7 +6,7 @@
 		"url": "https://github.com/Aumoa"
 	},
 	"version": "0.1.0",
-	"unity": "2023.1.12",
+	"unity": "2018.4",
 	"description": "High-performance Inspector Utility",
 	"keywords": ["Inspector"],
 	"license": "MIT",
