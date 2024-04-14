@@ -32,6 +32,22 @@ namespace Ayla.Timers.Runtime.Animators
             }
         }
 
+        public void SetChannel(ChannelMixer mixer, int channelIndex)
+        {
+            m_Mixer = mixer;
+            m_MixerChannelIndex = channelIndex;
+
+            if (didAwake)
+            {
+                RebindChannel();
+            }
+        }
+
+        public void SetChannel(ChannelMixer mixer, string channelName)
+        {
+            SetChannel(mixer, mixer.channels.FindIndex(p => p.name == channelName));
+        }
+
 #if UNITY_EDITOR
         public void RebindChannel()
         {
