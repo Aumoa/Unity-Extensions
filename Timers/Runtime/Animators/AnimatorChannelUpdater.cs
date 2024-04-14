@@ -56,8 +56,9 @@ namespace Ayla.Timers.Runtime.Animators
                 return;
             }
 
-            var channels = m_Mixer.channels;
-            if (m_MixerChannelIndex >= 0 && m_MixerChannelIndex < channels.Length)
+            var channels = m_Mixer ? m_Mixer.channels : null;
+            var length = channels?.Length ?? 0;
+            if (m_MixerChannelIndex >= 0 && m_MixerChannelIndex < length)
             {
                 m_Channel = m_Mixer.channels[m_MixerChannelIndex];
             }
