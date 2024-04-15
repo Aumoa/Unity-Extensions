@@ -201,7 +201,7 @@ namespace Ayla.Inspector.Editor.Extensions
 
         public static InspectorMember[] GetInspectorChildren(this object targetObject, Object unityObject, InspectorMember parent, IEnumerable<SerializedProperty> serializedProperties)
         {
-            var list = InternalGetInspectorChildren(targetObject, unityObject, parent, serializedProperties).ToList();
+            var list = InternalGetInspectorChildren(targetObject, unityObject, parent, serializedProperties);
             var orders = list
                 .Select(p => (member: p, attribute: p.GetCustomAttribute<OrderAttribute>()))
                 .Where(p => p.attribute != null)
@@ -232,11 +232,12 @@ namespace Ayla.Inspector.Editor.Extensions
             return list.ToArray();
         }
 
-        private static IEnumerable<InspectorMember> InternalGetInspectorChildren(this object targetObject, Object unityObject, InspectorMember parent, IEnumerable<SerializedProperty> serializedProperties)
+        private static List<InspectorMember> InternalGetInspectorChildren(this object targetObject, Object unityObject, InspectorMember parent, IEnumerable<SerializedProperty> serializedProperties)
         {
+            List<InspectorMember> inspectorMembers = new();
             if (targetObject == null)
             {
-                yield break;
+                return inspectorMembers;
             }
 
             var targetType = targetObject.GetType();
@@ -252,7 +253,7 @@ namespace Ayla.Inspector.Editor.Extensions
                     }
 
                     var lv = i;
-                    yield return new InspectorSerializedFieldMember(
+                    inspectorMembers.Add(new InspectorSerializedFieldMember(
                         parent,
                         unityObject,
                         () => list[lv],
@@ -260,7 +261,7 @@ namespace Ayla.Inspector.Editor.Extensions
                         enumerator.Current,
                         null,
                         $"[{lv}]"
-                        );
+                    ));
                 }
             }
             else
@@ -269,15 +270,15 @@ namespace Ayla.Inspector.Editor.Extensions
 
                 if (dict.TryGetValue("m_Script", out var scriptMember))
                 {
-                    yield return new InspectorScriptMember(parent, unityObject, scriptMember, "m_Script");
+                    inspectorMembers.Add(new InspectorScriptMember(parent, unityObject, scriptMember, "m_Script"));
                 }
 
-                foreach (var memberInfo in targetType.ForEachMembers(null))
+                foreach (var memberInfo in targetType.ForEachMembers(classType => inspectorMembers.Add(new InspectorClass(parent, unityObject, classType))))
                 {
                     if (dict.TryGetValue(memberInfo.Name, out var serializedProperty))
                     {
                         var fieldInfo = (FieldInfo)memberInfo;
-                        yield return new InspectorSerializedFieldMember(
+                        inspectorMembers.Add(new InspectorSerializedFieldMember(
                             parent,
                             unityObject,
                             () => fieldInfo.GetValue(targetObject),
@@ -285,7 +286,7 @@ namespace Ayla.Inspector.Editor.Extensions
                             serializedProperty,
                             fieldInfo,
                             memberInfo.Name
-                        );
+                        ));
 
                         continue;
                     }
@@ -295,13 +296,13 @@ namespace Ayla.Inspector.Editor.Extensions
                     {
                         if (memberInfo is MethodInfo methodInfo)
                         {
-                            yield return new InspectorButtonMember(
+                            inspectorMembers.Add(new InspectorButtonMember(
                                 parent,
                                 unityObject,
                                 methodInfo,
                                 memberInfo.Name,
                                 buttonAttribute
-                            );
+                            ));
 
                             continue;
                         }
@@ -312,13 +313,13 @@ namespace Ayla.Inspector.Editor.Extensions
                     {
                         if (memberInfo is MethodInfo methodInfo)
                         {
-                            yield return new InspectorCustomMember(
+                            inspectorMembers.Add(new InspectorCustomMember(
                                 parent,
                                 unityObject,
                                 methodInfo,
                                 methodInfo.Name,
                                 customAttribute
-                            );
+                            ));
 
                             continue;
                         }
@@ -329,14 +330,14 @@ namespace Ayla.Inspector.Editor.Extensions
                     {
                         if (memberInfo is FieldInfo fieldInfo)
                         {
-                            yield return new InspectorNonSerializedFieldMember(
+                            inspectorMembers.Add(new InspectorNonSerializedFieldMember(
                                 parent,
                                 unityObject,
                                 () => fieldInfo.GetValue(targetObject),
                                 value => fieldInfo.SetValue(targetObject, value),
                                 fieldInfo,
                                 memberInfo.Name
-                            );
+                            ));
                         }
                     }
 
@@ -344,18 +345,20 @@ namespace Ayla.Inspector.Editor.Extensions
                     {
                         if (memberInfo is PropertyInfo propertyInfo)
                         {
-                            yield return new InspectorNativePropertyMember(
+                            inspectorMembers.Add(new InspectorNativePropertyMember(
                                 parent,
                                 unityObject,
                                 () => propertyInfo.GetValue(targetObject),
                                 value => propertyInfo.SetValue(targetObject, value),
                                 propertyInfo,
                                 memberInfo.Name
-                            );
+                            ));
                         }
                     }
                 }
             }
+
+            return inspectorMembers;
         }
 
         public static IEnumerable<MemberInfo> ForEachMembers(this Type baseType, Action<Type> inTypeChangeCallback)

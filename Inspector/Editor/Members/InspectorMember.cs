@@ -1,6 +1,4 @@
-﻿// Copyright 2020-2023 Aumoa.lib. All right reserved.
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -89,24 +87,24 @@ namespace Ayla.Inspector.Editor.Members
             }
         }
 
-        public Attribute[] GetCustomAttributes(Type type)
+        public virtual Attribute[] GetCustomAttributes(Type type, bool inherit = false)
         {
             return (Attribute[])(memberInfo?.GetCustomAttributes(type) ?? Array.Empty<Attribute>());
         }
 
-        public T GetCustomAttribute<T>() where T : Attribute
+        public T GetCustomAttribute<T>(bool inherit = false) where T : Attribute
         {
-            return memberInfo?.GetCustomAttribute<T>();
+            return GetCustomAttributes(typeof(T), inherit).OfType<T>().FirstOrDefault();
         }
 
-        public T[] GetCustomAttributes<T>() where T : Attribute
+        public T[] GetCustomAttributes<T>(bool inherit = false) where T : Attribute
         {
-            return memberInfo?.GetCustomAttributes<T>().ToArray() ?? Array.Empty<T>();
+            return GetCustomAttributes(typeof(T), inherit).OfType<T>().ToArray();
         }
 
-        public bool HasCustomAttribute<T>() where T : Attribute
+        public bool HasCustomAttribute<T>(bool inherit = false) where T : Attribute
         {
-            return GetCustomAttribute<T>() != null;
+            return GetCustomAttribute<T>(inherit) != null;
         }
 
         public abstract string name { get; }

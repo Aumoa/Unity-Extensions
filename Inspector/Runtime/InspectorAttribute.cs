@@ -1,8 +1,8 @@
-﻿using System;
+﻿using UnityEngine;
 
 namespace Ayla.Inspector
 {
-    public class InspectorAttribute : Attribute
+    public class InspectorAttribute : PropertyAttribute
     {
     }
 }

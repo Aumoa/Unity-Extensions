@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using Ayla.Inspector.Editor.Drawer;
 using UnityEditor;
@@ -52,7 +51,7 @@ namespace Ayla.Inspector.Editor.Utilities
                             if (type == typeof(PropertyDrawer) || type.IsSubclassOf(typeof(PropertyDrawer)))
                             {
                                 var isDrawer = type.GetCustomAttributes<CustomPropertyDrawer>();
-                                if (isDrawer?.Any() == true)
+                                if (isDrawer != null)
                                 {
                                     foreach (var drawerAttr in isDrawer)
                                     {
@@ -65,7 +64,7 @@ namespace Ayla.Inspector.Editor.Utilities
                             else if (type == typeof(NativePropertyDrawer) || type.IsSubclassOf(typeof(NativePropertyDrawer)))
                             {
                                 var isDrawer = type.GetCustomAttributes<CustomNativePropertyDrawerAttribute>(false);
-                                if (isDrawer?.Any() == true)
+                                if (isDrawer != null)
                                 {
                                     foreach (var drawerAttr in isDrawer)
                                     {
@@ -78,7 +77,7 @@ namespace Ayla.Inspector.Editor.Utilities
                             else if (type == typeof(DecoratorDrawer) || type.IsSubclassOf(typeof(DecoratorDrawer)))
                             {
                                 var isDrawer = type.GetCustomAttributes<CustomPropertyDrawer>();
-                                if (isDrawer?.Any() == true)
+                                if (isDrawer != null)
                                 {
                                     foreach (var drawerAttr in isDrawer)
                                     {
@@ -91,6 +90,7 @@ namespace Ayla.Inspector.Editor.Utilities
                         }
                         catch
                         {
+                            // ignore exception.
                         }
                     }
                 }

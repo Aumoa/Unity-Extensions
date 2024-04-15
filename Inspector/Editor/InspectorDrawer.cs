@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Ayla.Inspector.Decorator;
 using Ayla.Inspector.Editor.Extensions;
 using Ayla.Inspector.Editor.Members;
 using Ayla.Inspector.Editor.Utilities;
@@ -136,9 +137,10 @@ namespace Ayla.Inspector.Editor
         public static float EvaluateDecorators(Rect position, InspectorMember inspectorMember, bool isLayout, bool doRender)
         {
             float spacing = 0;
-            foreach (var unityAttribute in inspectorMember.GetCustomAttributes<PropertyAttribute>())
+
+            void EvaluateDecorator(PropertyAttribute attribute)
             {
-                var drawer = ScriptAttributeUtility.InstantiateDecoratorDrawer(unityAttribute);
+                var drawer = ScriptAttributeUtility.InstantiateDecoratorDrawer(attribute);
                 if (drawer != null)
                 {
                     position.height = drawer.GetHeight();
@@ -154,6 +156,23 @@ namespace Ayla.Inspector.Editor
                     }
                     spacing += position.height;
                 }
+            }
+            
+            foreach (var unityAttribute in inspectorMember.GetCustomAttributes<PropertyAttribute>(inherit: true))
+            {
+                if (unityAttribute is IInheritableDecorator inheritableDecorator && inheritableDecorator.forDerived)
+                {
+                    EvaluateDecorator(unityAttribute);
+                }
+            }
+            foreach (var unityAttribute in inspectorMember.GetCustomAttributes<PropertyAttribute>(inherit: false))
+            {
+                if (unityAttribute is IInheritableDecorator inheritableDecorator && inheritableDecorator.forDerived)
+                {
+                    continue;
+                }
+                
+                EvaluateDecorator(unityAttribute);
             }
 
             return spacing;
