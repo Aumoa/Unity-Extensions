@@ -10,43 +10,51 @@ namespace Ayla.Behaviors.Runtime
 {
     public class BehaviorTree : MonoBehaviour
     {
-        private Task entryTask;
+        private Task m_RootTask;
 
         private void Awake()
         {
-            entryTask = transform.GetChildren().Select(p => p.GetComponent<Task>()).FirstOrDefault();
-            if (entryTask == null)
+            m_RootTask = GetRootTask();
+            if (m_RootTask == null)
             {
                 Debug.LogErrorFormat("There is no entry task.");
                 gameObject.SetActive(false);
             }
         }
 
+        private void Start()
+        {
+            if (m_RootTask)
+            {
+                Task.ExecuteStandby(m_RootTask);
+            }
+        }
+
         private void Update()
         {
-            if (entryTask == null)
+            if (m_RootTask == null)
             {
                 return;
             }
 
-            if (entryTask.lastStatus is not (TaskStatus.Standby or TaskStatus.Running))
+            if (m_RootTask.lastStatus is not (TaskStatus.Standby or TaskStatus.Running))
             {
                 return;
             }
 
-            var status = Task.ExecutePreUpdate(entryTask);
+            var status = Task.ExecutePreUpdate(m_RootTask);
             if (status != TaskStatus.Running)
             {
                 return;
             }
 
-            status = Task.ExecuteUpdate(entryTask);
+            status = Task.ExecuteUpdate(m_RootTask);
             if (status != TaskStatus.Running)
             {
                 return;
             }
 
-            status = Task.ExecuteLateUpdate(entryTask);
+            status = Task.ExecuteLateUpdate(m_RootTask);
             if (status != TaskStatus.Running)
             {
                 return;
@@ -55,10 +63,24 @@ namespace Ayla.Behaviors.Runtime
 
         private void OnEnable()
         {
-            if (didAwake && entryTask)
+            if (didAwake && m_RootTask)
             {
-                Task.ResetForChildren(entryTask);
+                Task.ResetForChildren(m_RootTask);
             }
+        }
+
+        public Task GetRootTask()
+        {
+            for (int i = 0; i < transform.childCount; ++i)
+            {
+                var child = transform.GetChild(i);
+                if (child.TryGetComponent<Task>(out var task))
+                {
+                    return task;
+                }
+            }
+
+            return null;
         }
 
 #if UNITY_EDITOR
@@ -70,7 +92,7 @@ namespace Ayla.Behaviors.Runtime
 
         private bool HasError(out ErrorId errorId)
         {
-            if (transform.GetChildren().Any(p => p.GetComponent<Task>()) == false)
+            if (GetRootTask() == null)
             {
                 errorId = ErrorId.NoEntryTask;
                 return true;

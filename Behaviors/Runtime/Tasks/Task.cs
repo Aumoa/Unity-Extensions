@@ -28,9 +28,15 @@ namespace Ayla.Behaviors.Runtime.Tasks
 
         public static void ExecuteStandby(Task task)
         {
-            foreach (var component in task.GetComponentsInChildren<Task>())
+            task.OnStandby();
+
+            if (task is Composite)
             {
-                component.OnStandby();
+                var transform = task.transform;
+                for (int i = 0; i < transform.childCount; ++i)
+                {
+                    ExecuteStandby(transform.GetChild(i).GetComponent<Task>());
+                }
             }
         }
 
