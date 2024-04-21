@@ -1,29 +1,30 @@
 using Ayla.Timers.Runtime.Channels;
 using UnityEngine;
+using UnityEngine.Playables;
 
-namespace Ayla.Timers.Runtime.Animators
+namespace Ayla.Timers.Runtime.Playables
 {
-    [RequireComponent(typeof(Animator))]
-    public class AnimatorChannelUpdater : MonoBehaviour
+    [RequireComponent(typeof(PlayableDirector))]
+    public class PlayableUpdater : MonoBehaviour
     {
         [SerializeField]
         private ChannelBinder m_ChannelBinder;
 
-        private Animator m_Animator;
+        private PlayableDirector m_PlayableDirector;
 
         public Channel channel => m_ChannelBinder.channel;
 
         private void Awake()
         {
-            m_Animator = GetComponent<Animator>();
-            m_Animator.updateMode = AnimatorUpdateMode.UnscaledTime;
+            m_PlayableDirector = GetComponent<PlayableDirector>();
+            m_PlayableDirector.timeUpdateMode = DirectorUpdateMode.UnscaledGameTime;
         }
 
         private void Update()
         {
             if (channel)
             {
-                m_Animator.speed = (float)channel.scale;
+                m_PlayableDirector.playableGraph.GetRootPlayable(0).SetSpeed(channel.scale);
             }
         }
 
