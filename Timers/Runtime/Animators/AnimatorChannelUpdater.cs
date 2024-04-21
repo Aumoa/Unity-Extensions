@@ -7,12 +7,6 @@ namespace Ayla.Timers.Runtime.Animators
     public class AnimatorChannelUpdater : MonoBehaviour
     {
         [SerializeField]
-        private ChannelMixer m_Mixer;
-
-        [SerializeField]
-        private int m_MixerChannelIndex;
-
-        [SerializeField]
         private ChannelBinder m_ChannelBinder;
 
         private Animator m_Animator;
@@ -37,8 +31,8 @@ namespace Ayla.Timers.Runtime.Animators
 
         public void SetChannel(ChannelMixer mixer, int channelIndex)
         {
-            m_Mixer = mixer;
-            m_MixerChannelIndex = channelIndex;
+            m_ChannelBinder.mixer = mixer;
+            m_ChannelBinder.channelIndex = channelIndex;
 
             if (didAwake)
             {
@@ -59,16 +53,7 @@ namespace Ayla.Timers.Runtime.Animators
                 return;
             }
 
-            var channels = m_Mixer ? m_Mixer.channels : null;
-            var length = channels?.Length ?? 0;
-            if (m_MixerChannelIndex >= 0 && m_MixerChannelIndex < length)
-            {
-                m_Channel = m_Mixer.channels[m_MixerChannelIndex];
-            }
-            else
-            {
-                m_Channel = null;
-            }
+            m_Channel = m_ChannelBinder.channel;
         }
 #endif
     }

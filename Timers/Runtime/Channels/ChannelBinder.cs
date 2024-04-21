@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using Ayla.Inspector.Runtime.Utilities;
 using Ayla.Inspector.SpecialCase;
 using UnityEditor;
@@ -17,7 +16,17 @@ namespace Ayla.Timers.Runtime.Channels
         [SerializeField, HideInInspector]
         internal int m_ChannelIndex;
 
-        public ChannelMixer mixer { get; set; }
+        public ChannelMixer mixer
+        {
+            get => m_Mixer;
+            set => m_Mixer = value;
+        }
+
+        public int channelIndex
+        {
+            get => m_ChannelIndex;
+            set => m_ChannelIndex = value;
+        }
 
         public Channel channel => m_Mixer ? m_Mixer.GetChannel(m_ChannelIndex) : null;
 
