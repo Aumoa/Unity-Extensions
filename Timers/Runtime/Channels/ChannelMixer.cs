@@ -12,6 +12,7 @@ namespace Ayla.Timers.Runtime.Channels
         private Channel m_MasterChannel;
 
         private List<Channel> m_ChannelsCache;
+        private List<string> m_ChannelNamesCache;
 
         public Channel masterChannel => m_MasterChannel;
 
@@ -19,21 +20,48 @@ namespace Ayla.Timers.Runtime.Channels
         {
             get
             {
-                m_ChannelsCache ??= new();
-                m_ChannelsCache.Clear();
-
-                void AddRecursive(Channel channel)
-                {
-                    m_ChannelsCache.Add(channel);
-                    foreach (var child in channel.children)
-                    {
-                        AddRecursive(child);
-                    }
-                }
-
-                AddRecursive(m_MasterChannel);
+                CacheChannelsMeta();
                 return m_ChannelsCache.ToArray();
             }
+        }
+
+        public string[] channelNames
+        {
+            get
+            {
+                CacheChannelsMeta();
+                return m_ChannelNamesCache.ToArray();
+            }
+        }
+
+        private void CacheChannelsMeta()
+        {
+            m_ChannelsCache ??= new();
+            m_ChannelsCache.Clear();
+            m_ChannelNamesCache ??= new List<string>();
+            m_ChannelNamesCache.Clear();
+
+            void AddRecursive(Channel channel)
+            {
+                m_ChannelsCache.Add(channel);
+                m_ChannelNamesCache.Add(channel.name);
+                foreach (var child in channel.children)
+                {
+                    AddRecursive(child);
+                }
+            }
+
+            AddRecursive(m_MasterChannel);
+        }
+
+        public Channel GetChannel(int index)
+        {
+            if (channels.Length > index)
+            {
+                return channels[index];
+            }
+
+            return null;
         }
 
         internal void UpdateTimer(double deltaTime)

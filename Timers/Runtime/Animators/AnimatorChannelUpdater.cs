@@ -12,6 +12,9 @@ namespace Ayla.Timers.Runtime.Animators
         [SerializeField]
         private int m_MixerChannelIndex;
 
+        [SerializeField]
+        private ChannelBinder m_ChannelBinder;
+
         private Animator m_Animator;
         private Channel m_Channel;
 
