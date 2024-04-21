@@ -55,8 +55,6 @@ namespace Ayla.Inspector.Editor.Members
                 return;
             }
 
-            rect = EditorGUI.IndentedRect(rect);
-
             var ownedObject = GetParent().GetValue();
             GUILayout.BeginArea(rect, EditorStyles.inspectorDefaultMargins);
             var parameters = paramsCount switch
@@ -66,7 +64,12 @@ namespace Ayla.Inspector.Editor.Members
                 2 => new object[] { rect, label },
                 _ => throw new InvalidOperationException("Unexpected error")
             };
-            methodInfo.Invoke(ownedObject, parameters);
+            var result = methodInfo.Invoke(ownedObject, parameters);
+            if (methodInfo.ReturnType == typeof(bool) && (bool)result)
+            {
+                GetParent().SetValue(ownedObject);
+                EditorUtility.SetDirty(GetUnityObject());
+            }
             GUILayout.EndArea();
         }
 
@@ -86,6 +89,7 @@ namespace Ayla.Inspector.Editor.Members
                 }
             }
 
+            height += EditorStyles.inspectorDefaultMargins.padding.vertical;
             return height;
         }
 

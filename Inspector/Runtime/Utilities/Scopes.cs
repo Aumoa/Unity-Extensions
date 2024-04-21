@@ -8,17 +8,17 @@ namespace Ayla.Inspector.Runtime.Utilities
     {
         public readonly struct ColorScopeBuilder : IDisposable
         {
-            private readonly Color previousColor;
+            private readonly Color m_PreviousColor;
 
             public ColorScopeBuilder(Color color)
             {
-                previousColor = GUI.color;
+                m_PreviousColor = GUI.color;
                 GUI.color = color;
             }
 
             public readonly void Dispose()
             {
-                GUI.color = previousColor;
+                GUI.color = m_PreviousColor;
             }
         }
 
@@ -29,17 +29,17 @@ namespace Ayla.Inspector.Runtime.Utilities
 
         public readonly struct IndentLevelScopeBuilder : IDisposable
         {
-            private readonly int previousIndentLevel;
+            private readonly int m_PreviousIndentLevel;
 
             public IndentLevelScopeBuilder(int increaseIndentLevel)
             {
-                previousIndentLevel = EditorGUI.indentLevel;
+                m_PreviousIndentLevel = EditorGUI.indentLevel;
                 EditorGUI.indentLevel += increaseIndentLevel;
             }
 
             public readonly void Dispose()
             {
-                EditorGUI.indentLevel = previousIndentLevel;
+                EditorGUI.indentLevel = m_PreviousIndentLevel;
             }
         }
 
@@ -74,6 +74,33 @@ namespace Ayla.Inspector.Runtime.Utilities
         {
             GUILayout.BeginVertical();
             return default;
+        }
+
+        public readonly struct ChangedScopeBuilder : IDisposable
+        {
+            private readonly bool m_PreviousChanged;
+            private readonly bool m_IgnoreCurrent;
+
+            public ChangedScopeBuilder(bool previousChanged, bool ignoreCurrent)
+            {
+                m_PreviousChanged = previousChanged;
+                m_IgnoreCurrent = ignoreCurrent;
+            }
+
+            public void Dispose()
+            {
+                bool changed = m_PreviousChanged;
+                if (m_IgnoreCurrent == false && GUI.changed)
+                {
+                    changed = true;
+                }
+                GUI.changed = changed;
+            }
+        }
+
+        public static ChangedScopeBuilder ChangedScope(bool ignoreCurrent = false)
+        {
+            return new ChangedScopeBuilder(GUI.changed, ignoreCurrent);
         }
     }
 }
