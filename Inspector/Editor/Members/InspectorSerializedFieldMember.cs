@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using Ayla.Inspector.Editor.Extensions;
+using Ayla.Inspector.Editor.Utilities;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
@@ -39,7 +39,9 @@ namespace Ayla.Inspector.Editor.Members
 
         private void CacheChildren()
         {
-            cachedChildren = GetValue().GetInspectorChildren(GetUnityObject(), this, serializedProperty.GetChildren()).ToArray();
+            var list = ListUtility.AcquireScoped<SerializedProperty>();
+            serializedProperty.GetChildren(list.m_Source);
+            cachedChildren = GetValue().GetInspectorChildren(GetUnityObject(), this, list.m_Source);
         }
 
         public override float GetHeight()

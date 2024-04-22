@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Ayla.Inspector.Editor.Extensions;
+using Ayla.Inspector.Editor.Utilities;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
@@ -61,7 +62,9 @@ namespace Ayla.Inspector.Editor.Members
 
         private void CacheChildren()
         {
-            cachedChildren = GetValue().GetInspectorChildren(GetUnityObject(), this, serializedObject.GetChildren()).ToArray();
+            var list = ListUtility.AcquireScoped<SerializedProperty>();
+            serializedObject.GetChildren(list.m_Source);
+            cachedChildren = GetValue().GetInspectorChildren(GetUnityObject(), this, list.m_Source);
         }
     }
 }

@@ -1,13 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System;
-using UnityEditor;
-using UnityEngine;
-using System.Collections;
 using Ayla.Inspector.Editor.Members;
+using Ayla.Inspector.Editor.Utilities;
 using Ayla.Inspector.Meta;
 using Ayla.Inspector.SpecialCase;
+using UnityEditor;
+using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace Ayla.Inspector.Editor.Extensions
@@ -32,70 +33,6 @@ namespace Ayla.Inspector.Editor.Extensions
         {
             string uniqueId = serializedProperty.serializedObject.targetObject.GetInstanceID() + serializedProperty.propertyPath;
             return uniqueId;
-        }
-
-        private static object GetTargetObject(this SerializedProperty serializedProperty)
-        {
-            string propertyPath = serializedProperty.propertyPath.NormalizeUnityPath();
-            string[] elements = propertyPath.Split('.');
-            object currentObject = serializedProperty.serializedObject.targetObject;
-            var currentType = currentObject.GetType();
-
-            foreach (var element in elements)
-            {
-                if (element[^1] == ']')
-                {
-                    var indexOf = element.IndexOf('[');
-                    var name = element[..indexOf];
-                    int.TryParse(element[(indexOf + 1)..(^1)], out int index);
-                    var listMemberInfo = currentType.GetMember(name);
-                    if (listMemberInfo.Length != 1)
-                    {
-                        return null;
-                    }
-
-                    var currentMember = listMemberInfo[0];
-                    Type listType = currentMember.GetReturningType();
-                    currentType = listType.GetElementType() ?? listType.GetGenericArguments()[0];
-                    var list = (IList)currentMember.GetReturningValue(currentObject);
-                    if (list.Count <= index)
-                    {
-                        return null;
-                    }
-                    currentObject = list[index];
-                }
-                else
-                {
-                    var member = currentType.GetMember(element);
-                    if (member.Length != 1)
-                    {
-                        return null;
-                    }
-
-                    var memberType = member.First();
-                    if (element[^1] == ']')
-                    {
-                        var returningType = memberType.GetReturningType();
-                        if (returningType.IsArray)
-                        {
-                            memberType = returningType.GetElementType();
-                        }
-                        else
-                        {
-                            memberType = returningType.GetGenericArguments().FirstOrDefault();
-                            if (memberType == null)
-                            {
-                                return null;
-                            }
-                        }
-                    }
-
-                    currentType = memberType.GetReturningType();
-                    currentObject = memberType.GetReturningValue(currentObject);
-                }
-            }
-
-            return currentObject;
         }
 
         public static MemberInfo GetMemberInfo(this SerializedProperty serializedProperty)
@@ -201,43 +138,49 @@ namespace Ayla.Inspector.Editor.Extensions
 
         public static InspectorMember[] GetInspectorChildren(this object targetObject, Object unityObject, InspectorMember parent, IEnumerable<SerializedProperty> serializedProperties)
         {
-            var list = InternalGetInspectorChildren(targetObject, unityObject, parent, serializedProperties);
-            var orders = list
-                .Select(p => (member: p, attribute: p.GetCustomAttribute<OrderAttribute>()))
-                .Where(p => p.attribute != null)
-                .ToArray();
+            var list = ListUtility.AcquireScoped<InspectorMember>();
+            InternalGetInspectorChildren(targetObject, unityObject, parent, serializedProperties, list.m_Source);
 
-            foreach (var (member, order) in orders)
+            var orders = ListUtility.AcquireScoped<(InspectorMember, OrderAttribute)>();
+            foreach (var member in list.m_Source)
+            {
+                var attribute = member.GetCustomAttribute<OrderAttribute>();
+                if (attribute != null)
+                {
+                    orders.m_Source.Add((member, attribute));
+                }
+            }
+
+            foreach (var (member, order) in orders.m_Source)
             {
                 if (order is OrderBeforeAttribute orderBefore)
                 {
-                    list.Remove(member);
-                    int indexOf = list.FindIndex(p => p.name == orderBefore.memberName);
+                    list.m_Source.Remove(member);
+                    int indexOf = list.m_Source.FindIndex(p => p.name == orderBefore.memberName);
                     if (indexOf != -1)
                     {
-                        list.Insert(indexOf, member);
+                        list.m_Source.Insert(indexOf, member);
                     }
                 }
                 else if (order is OrderAfterAttribute orderAfter)
                 {
-                    list.Remove(member);
-                    int indexOf = list.FindIndex(p => p.name == orderAfter.memberName);
+                    list.m_Source.Remove(member);
+                    int indexOf = list.m_Source.FindIndex(p => p.name == orderAfter.memberName);
                     if (indexOf != -1)
                     {
-                        list.Insert(indexOf + 1, member);
+                        list.m_Source.Insert(indexOf + 1, member);
                     }
                 }
             }
 
-            return list.ToArray();
+            return list.m_Source.ToArray();
         }
 
-        private static List<InspectorMember> InternalGetInspectorChildren(this object targetObject, Object unityObject, InspectorMember parent, IEnumerable<SerializedProperty> serializedProperties)
+        private static void InternalGetInspectorChildren(this object targetObject, Object unityObject, InspectorMember parent, IEnumerable<SerializedProperty> serializedProperties, List<InspectorMember> output)
         {
-            List<InspectorMember> inspectorMembers = new();
             if (targetObject == null)
             {
-                return inspectorMembers;
+                return;
             }
 
             var targetType = targetObject.GetType();
@@ -253,7 +196,7 @@ namespace Ayla.Inspector.Editor.Extensions
                     }
 
                     var lv = i;
-                    inspectorMembers.Add(new InspectorSerializedFieldMember(
+                    output.Add(new InspectorSerializedFieldMember(
                         parent,
                         unityObject,
                         () => list[lv],
@@ -270,15 +213,15 @@ namespace Ayla.Inspector.Editor.Extensions
 
                 if (dict.TryGetValue("m_Script", out var scriptMember))
                 {
-                    inspectorMembers.Add(new InspectorScriptMember(parent, unityObject, scriptMember, "m_Script"));
+                    output.Add(new InspectorScriptMember(parent, unityObject, scriptMember, "m_Script"));
                 }
 
-                foreach (var memberInfo in targetType.ForEachMembers(classType => inspectorMembers.Add(new InspectorClass(parent, unityObject, classType))))
+                void HandleForMember(MemberInfo memberInfo)
                 {
                     if (dict.TryGetValue(memberInfo.Name, out var serializedProperty))
                     {
                         var fieldInfo = (FieldInfo)memberInfo;
-                        inspectorMembers.Add(new InspectorSerializedFieldMember(
+                        output.Add(new InspectorSerializedFieldMember(
                             parent,
                             unityObject,
                             () => fieldInfo.GetValue(targetObject),
@@ -288,7 +231,7 @@ namespace Ayla.Inspector.Editor.Extensions
                             memberInfo.Name
                         ));
 
-                        continue;
+                        return;
                     }
 
                     var buttonAttribute = memberInfo.GetCustomAttribute<ButtonAttribute>();
@@ -296,7 +239,7 @@ namespace Ayla.Inspector.Editor.Extensions
                     {
                         if (memberInfo is MethodInfo methodInfo)
                         {
-                            inspectorMembers.Add(new InspectorButtonMember(
+                            output.Add(new InspectorButtonMember(
                                 parent,
                                 unityObject,
                                 methodInfo,
@@ -304,7 +247,7 @@ namespace Ayla.Inspector.Editor.Extensions
                                 buttonAttribute
                             ));
 
-                            continue;
+                            return;
                         }
                     }
 
@@ -313,7 +256,7 @@ namespace Ayla.Inspector.Editor.Extensions
                     {
                         if (memberInfo is MethodInfo methodInfo)
                         {
-                            inspectorMembers.Add(new InspectorCustomMember(
+                            output.Add(new InspectorCustomMember(
                                 parent,
                                 unityObject,
                                 methodInfo,
@@ -321,7 +264,7 @@ namespace Ayla.Inspector.Editor.Extensions
                                 customAttribute
                             ));
 
-                            continue;
+                            return;
                         }
                     }
 
@@ -330,7 +273,7 @@ namespace Ayla.Inspector.Editor.Extensions
                     {
                         if (memberInfo is FieldInfo fieldInfo)
                         {
-                            inspectorMembers.Add(new InspectorNonSerializedFieldMember(
+                            output.Add(new InspectorNonSerializedFieldMember(
                                 parent,
                                 unityObject,
                                 () => fieldInfo.GetValue(targetObject),
@@ -345,7 +288,7 @@ namespace Ayla.Inspector.Editor.Extensions
                     {
                         if (memberInfo is PropertyInfo propertyInfo)
                         {
-                            inspectorMembers.Add(new InspectorNativePropertyMember(
+                            output.Add(new InspectorNativePropertyMember(
                                 parent,
                                 unityObject,
                                 () => propertyInfo.GetValue(targetObject),
@@ -356,12 +299,17 @@ namespace Ayla.Inspector.Editor.Extensions
                         }
                     }
                 }
-            }
 
-            return inspectorMembers;
+                void HandleForClass(Type @class)
+                {
+                    output.Add(new InspectorClass(parent, unityObject, @class));
+                }
+
+                targetType.ForEachMembers(HandleForMember, HandleForClass);
+            }
         }
 
-        public static IEnumerable<MemberInfo> ForEachMembers(this Type baseType, Action<Type> inTypeChangeCallback)
+        public static void ForEachMembers(this Type baseType, Action<MemberInfo> memberCallback, Action<Type> inTypeChangeCallback)
         {
             const BindingFlags bindingFlags
                 = BindingFlags.Instance | BindingFlags.Static
@@ -371,34 +319,43 @@ namespace Ayla.Inspector.Editor.Extensions
                 | BindingFlags.InvokeMethod
                 | BindingFlags.DeclaredOnly;
 
-            var stack = new Stack<Type>();
-            while (baseType != typeof(object) && baseType != null)
+            bool IsNotInstrictTypeOrNull(Type type)
             {
-                stack.Push(baseType);
+                return type != null
+                    && type != typeof(Object)
+                    && type != typeof(object)
+                    && type != typeof(ScriptableObject)
+                    && type != typeof(Component);
+            }
+
+            var stack = ListUtility.AcquireScoped<Type>();
+            while (IsNotInstrictTypeOrNull(baseType))
+            {
+                stack.m_Source.Add(baseType);
                 baseType = baseType.BaseType;
             }
 
-            while (stack.TryPop(out var pop))
+            while (ListUtility.TryPop(stack.m_Source, out var pop))
             {
                 inTypeChangeCallback?.Invoke(pop);
                 foreach (var member in pop.GetMembers(bindingFlags))
                 {
-                    yield return member;
+                    memberCallback.Invoke(member);
                 }
             }
         }
 
-        public static IEnumerable<SerializedProperty> GetChildren(this SerializedObject serializedObject)
+        public static void GetChildren(this SerializedObject serializedObject, List<SerializedProperty> output)
         {
             var iterator = serializedObject.GetIterator();
             if (iterator.Next(true) == false)
             {
-                yield break;
+                return;
             }
 
             do
             {
-                yield return iterator.Copy();
+                output.Add(iterator.Copy());
             }
             while (iterator.Next(false));
         }
@@ -408,13 +365,13 @@ namespace Ayla.Inspector.Editor.Extensions
             return serializedProperty.isArray && serializedProperty.type != "string";
         }
 
-        public static IEnumerable<SerializedProperty> GetChildren(this SerializedProperty serializedProperty)
+        public static void GetChildren(this SerializedProperty serializedProperty, List<SerializedProperty> output)
         {
             if (serializedProperty.IsList())
             {
                 for (int i = 0; i < serializedProperty.arraySize; ++i)
                 {
-                    yield return serializedProperty.GetArrayElementAtIndex(i).Copy();
+                    output.Add(serializedProperty.GetArrayElementAtIndex(i).Copy());
                 }
             }
             else
@@ -423,17 +380,17 @@ namespace Ayla.Inspector.Editor.Extensions
                 var iterator = serializedProperty.Copy();
                 if (iterator.Next(true) == false)
                 {
-                    yield break;
+                    return;
                 }
 
                 do
                 {
                     if (level + 1 != iterator.depth)
                     {
-                        yield break;
+                        return;
                     }
 
-                    yield return iterator.Copy();
+                    output.Add(iterator.Copy());
                 }
                 while (iterator.Next(false));
             }
