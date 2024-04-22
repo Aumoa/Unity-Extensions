@@ -118,25 +118,23 @@ namespace Ayla.Behaviors.Runtime
         }
 
         [CustomInspector(nameof(validateInspectorHeight))]
-        private void ValidateInspector(Rect position, GUIContent label)
+        private void ValidateInspector()
         {
             if (HasError(out var errorId))
             {
                 using var scope = Scopes.ColorScope(Color.red);
-                position.height = EditorGUIUtility.singleLineHeight;
-                GUI.Label(position, "Invalidate");
-                position.y += position.height + EditorGUIUtility.standardVerticalSpacing;
+                EditorGUILayout.LabelField("Invalid");
                 switch (errorId)
                 {
                     case ErrorId.NoEntryTask:
-                        GUI.Label(position, "There is no entry task in BehaviorTree.");
+                        EditorGUILayout.LabelField("There is no entry task in BehaviorTree.");
                         break;
                 }
             }
             else
             {
                 using var scope = Scopes.ColorScope(Color.green);
-                GUI.Label(position, "Validate");
+                EditorGUILayout.LabelField("Validate");
             }
         }
 #endif

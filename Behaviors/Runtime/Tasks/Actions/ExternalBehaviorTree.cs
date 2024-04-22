@@ -24,6 +24,11 @@ namespace Ayla.Behaviors.Runtime.Tasks.Actions
 
         protected override TaskStatus OnPreUpdate()
         {
+            if (m_RootTask == null)
+            {
+                return TaskStatus.Failure;
+            }
+
             var status = ExecutePreUpdate(m_RootTask);
             if (status == TaskStatus.Running)
             {
@@ -35,6 +40,11 @@ namespace Ayla.Behaviors.Runtime.Tasks.Actions
 
         protected override TaskStatus OnUpdate()
         {
+            if (m_RootTask == null)
+            {
+                return TaskStatus.Failure;
+            }
+
             var status = ExecuteUpdate(m_RootTask);
             if (status == TaskStatus.Running)
             {
@@ -46,6 +56,11 @@ namespace Ayla.Behaviors.Runtime.Tasks.Actions
 
         protected override TaskStatus OnLateUpdate()
         {
+            if (m_RootTask == null)
+            {
+                return TaskStatus.Failure;
+            }
+
             var status = ExecuteLateUpdate(m_RootTask);
             if (status == TaskStatus.Running)
             {
@@ -53,6 +68,15 @@ namespace Ayla.Behaviors.Runtime.Tasks.Actions
             }
 
             return status;
+        }
+
+        protected override void OnExit()
+        {
+            if (m_RootTask)
+            {
+                Destroy(m_RootTask.gameObject);
+                m_RootTask = null;
+            }
         }
     }
 }
