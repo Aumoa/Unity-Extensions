@@ -1,4 +1,5 @@
 using System;
+using Ayla.Inspector.Meta;
 using Ayla.Inspector.Runtime.Utilities;
 using Ayla.Inspector.SpecialCase;
 using UnityEditor;
@@ -10,7 +11,7 @@ namespace Ayla.Timers.Runtime.Channels
     [Serializable]
     public struct ChannelBinder
     {
-        [SerializeField, HideInInspector]
+        [SerializeField]
         internal ChannelMixer m_Mixer;
 
         [SerializeField, HideInInspector]
@@ -33,7 +34,7 @@ namespace Ayla.Timers.Runtime.Channels
 #if UNITY_EDITOR
         private float inspectorHeight => PopulateInspectorRenderCommands(false, out _);
 
-        [CustomInspector(nameof(inspectorHeight))]
+        [CustomInspector(nameof(inspectorHeight)), OrderAfter(nameof(m_Mixer))]
         private bool OnInspectorGUI()
         {
             PopulateInspectorRenderCommands(true, out bool isModified);
@@ -56,7 +57,6 @@ namespace Ayla.Timers.Runtime.Channels
 
             GUI.changed = false;
 
-            m_Mixer = ObjectField("Mixer", m_Mixer);
             if (m_Mixer)
             {
                 spacing += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
