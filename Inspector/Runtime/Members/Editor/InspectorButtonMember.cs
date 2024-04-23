@@ -97,10 +97,7 @@ namespace Ayla.Inspector.Members.Editor
                 return;
             }
 
-            var dispatch = GetParent()
-                .GetChildren()
-                .ToDictionary(p => p.name, p => p);
-
+            var dispatch = GetParent().siblings;
             var arguments = m_Attribute.bindings
                 .Select(p =>
                 {

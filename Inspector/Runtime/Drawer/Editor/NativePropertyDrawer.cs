@@ -124,66 +124,70 @@ namespace Ayla.Inspector.Drawer.Editor
                     var unityObject = property.GetUnityObject();
                     Undo.RecordObject(unityObject, "Native Property");
 
-                    switch (typeCode)
+
+                    if (enumValue != null)
                     {
-                        case TypeCode.Byte:
-                            property.SetValue((byte)intValue.Value);
-                            break;
-                        case TypeCode.SByte:
-                            property.SetValue((sbyte)intValue.Value);
-                            break;
-                        case TypeCode.Int16:
-                            property.SetValue((short)intValue.Value);
-                            break;
-                        case TypeCode.UInt16:
-                            property.SetValue((ushort)intValue.Value);
-                            break;
-                        case TypeCode.Int32:
-                            property.SetValue(intValue.Value);
-                            break;
-                        case TypeCode.UInt32:
-                            property.SetValue((uint)intValue.Value);
-                            break;
-                        case TypeCode.Int64:
-                            property.SetValue(longValue.Value);
-                            break;
-                        case TypeCode.UInt64:
-                            property.SetValue((ulong)longValue.Value);
-                            break;
-                        case TypeCode.Single:
-                            property.SetValue(floatValue.Value);
-                            break;
-                        case TypeCode.Double:
-                            property.SetValue(doubleValue.Value);
-                            break;
-                        case TypeCode.Decimal:
-                            property.SetValue((decimal)doubleValue.Value);
-                            break;
-                        case TypeCode.String:
-                            property.SetValue(stringValue);
-                            break;
-                        default:
-                            if (valueType == typeof(Vector2))
-                            {
-                                property.SetValue(vector2Value.Value);
-                            }
-                            else if (valueType == typeof(Vector2Int))
-                            {
-                                property.SetValue(vector2IntValue.Value);
-                            }
-                            else if (valueType == typeof(Vector3))
-                            {
-                                property.SetValue(vector3Value.Value);
-                            }
-                            else if (valueType == typeof(Vector3Int))
-                            {
-                                property.SetValue(vector3IntValue.Value);
-                            }
-                            else if (valueType.IsEnum)
-                            {
-                                property.SetValue(enumValue);
-                            }
-                            break;
+                        property.SetValue(enumValue);
+                    }
+                    else
+                    {
+                        switch (typeCode)
+                        {
+                            case TypeCode.Byte:
+                                property.SetValue((byte)intValue.Value);
+                                break;
+                            case TypeCode.SByte:
+                                property.SetValue((sbyte)intValue.Value);
+                                break;
+                            case TypeCode.Int16:
+                                property.SetValue((short)intValue.Value);
+                                break;
+                            case TypeCode.UInt16:
+                                property.SetValue((ushort)intValue.Value);
+                                break;
+                            case TypeCode.Int32:
+                                property.SetValue(intValue.Value);
+                                break;
+                            case TypeCode.UInt32:
+                                property.SetValue((uint)intValue.Value);
+                                break;
+                            case TypeCode.Int64:
+                                property.SetValue(longValue.Value);
+                                break;
+                            case TypeCode.UInt64:
+                                property.SetValue((ulong)longValue.Value);
+                                break;
+                            case TypeCode.Single:
+                                property.SetValue(floatValue.Value);
+                                break;
+                            case TypeCode.Double:
+                                property.SetValue(doubleValue.Value);
+                                break;
+                            case TypeCode.Decimal:
+                                property.SetValue((decimal)doubleValue.Value);
+                                break;
+                            case TypeCode.String:
+                                property.SetValue(stringValue);
+                                break;
+                            default:
+                                if (valueType == typeof(Vector2))
+                                {
+                                    property.SetValue(vector2Value.Value);
+                                }
+                                else if (valueType == typeof(Vector2Int))
+                                {
+                                    property.SetValue(vector2IntValue.Value);
+                                }
+                                else if (valueType == typeof(Vector3))
+                                {
+                                    property.SetValue(vector3Value.Value);
+                                }
+                                else if (valueType == typeof(Vector3Int))
+                                {
+                                    property.SetValue(vector3IntValue.Value);
+                                }
+                                break;
+                        }
                     }
 
                     EditorUtility.SetDirty(property.GetUnityObject());
