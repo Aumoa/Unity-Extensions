@@ -1,10 +1,9 @@
 using System;
+using Ayla.Inspector.Editor;
 using Ayla.Inspector.Meta;
-using Ayla.Inspector.Runtime.Utilities;
 using Ayla.Inspector.SpecialCase;
-using UnityEditor;
+using Ayla.Inspector.Utilities;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace Ayla.Timers.Runtime.Channels
 {
@@ -32,43 +31,19 @@ namespace Ayla.Timers.Runtime.Channels
         public Channel channel => m_Mixer ? m_Mixer.GetChannel(m_ChannelIndex) : null;
 
 #if UNITY_EDITOR
-        private float inspectorHeight => PopulateInspectorRenderCommands(false, out _);
-
-        [CustomInspector(nameof(inspectorHeight)), OrderAfter(nameof(m_Mixer))]
+        [CustomInspector, OrderAfter(nameof(m_Mixer))]
         private bool OnInspectorGUI()
         {
-            PopulateInspectorRenderCommands(true, out bool isModified);
-            return isModified;
-        }
-
-        private float PopulateInspectorRenderCommands(bool doRender, out bool isModified)
-        {
-            float spacing = 0;
-
-            T ObjectField<T>(string label, T unityObject) where T : Object
-            {
-                spacing += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
-                if (doRender)
-                {
-                    return (T)EditorGUILayout.ObjectField(label, unityObject, typeof(T), allowSceneObjects: false);
-                }
-                return unityObject;
-            }
-
-            GUI.changed = false;
+            using var scope = Scopes.ChangedScope();
 
             if (m_Mixer)
             {
-                spacing += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
                 string[] names = m_Mixer.channelNames;
-                if (doRender)
-                {
-                    m_ChannelIndex = EditorGUILayout.Popup("Channel", m_ChannelIndex, names);
-                }
+                m_ChannelIndex = CustomInspectorLayout.Popup("Channel", m_ChannelIndex, names);
 
                 using (Scopes.ChangedScope())
                 {
-                    Channel newChannel = ObjectField(string.Empty, channel);
+                    var newChannel = (Channel)CustomInspectorLayout.ObjectField(string.Empty, channel, typeof(Channel), false);
                     if (GUI.changed)
                     {
                         m_ChannelIndex = m_Mixer.channels.FindIndex(p => p == newChannel);
@@ -76,8 +51,7 @@ namespace Ayla.Timers.Runtime.Channels
                 }
             }
 
-            isModified = GUI.changed;
-            return spacing;
+            return GUI.changed;
         }
 #endif
     }

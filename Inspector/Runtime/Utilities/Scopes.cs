@@ -2,7 +2,7 @@ using System;
 using UnityEditor;
 using UnityEngine;
 
-namespace Ayla.Inspector.Runtime.Utilities
+namespace Ayla.Inspector.Utilities
 {
     public static class Scopes
     {

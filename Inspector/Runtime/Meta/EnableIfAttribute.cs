@@ -9,5 +9,9 @@ namespace Ayla.Inspector.Meta
         {
             inverted = false;
         }
+
+        public EnableIfAttribute(string name) : this(name, true)
+        {
+        }
     }
 }

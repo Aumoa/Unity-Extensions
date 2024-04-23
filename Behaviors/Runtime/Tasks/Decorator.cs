@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Ayla.Inspector.Runtime.Utilities;
+using Ayla.Inspector.Editor;
 using Ayla.Inspector.SpecialCase;
-using UnityEditor;
+using Ayla.Inspector.Utilities;
 using UnityEngine;
 
 namespace Ayla.Behaviors.Runtime.Tasks
@@ -77,42 +77,27 @@ namespace Ayla.Behaviors.Runtime.Tasks
             return false;
         }
 
-        private float validateInspectorHeight
-        {
-            get
-            {
-                if (HasError(out _))
-                {
-                    return EditorGUIUtility.singleLineHeight * 2.0f + EditorGUIUtility.standardVerticalSpacing;
-                }
-                else
-                {
-                    return EditorGUIUtility.singleLineHeight;
-                }
-            }
-        }
-
-        [CustomInspector(nameof(validateInspectorHeight))]
+        [CustomInspector]
         private void ValidateInspector()
         {
             if (HasError(out var errorId))
             {
                 using var scope = Scopes.ColorScope(Color.red);
-                GUILayout.Label("Invalidate");
+                CustomInspectorLayout.LabelField("Invalidate");
                 switch (errorId)
                 {
                     case ErrorId.NoChildren:
-                        GUILayout.Label("There is no child in Decorator.");
+                        CustomInspectorLayout.LabelField("There is no child in Decorator.");
                         break;
                     case ErrorId.OverChildren:
-                        GUILayout.Label("Decorator only allow single child.");
+                        CustomInspectorLayout.LabelField("Decorator only allow single child.");
                         break;
                 }
             }
             else
             {
                 using var scope = Scopes.ColorScope(Color.green);
-                GUILayout.Label("Validate");
+                CustomInspectorLayout.LabelField("Validate");
             }
         }
 #endif

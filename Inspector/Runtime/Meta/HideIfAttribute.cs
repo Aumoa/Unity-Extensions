@@ -9,5 +9,9 @@ namespace Ayla.Inspector.Meta
         {
             inverted = true;
         }
+        
+        public HideIfAttribute(string name) : this(name, true)
+        {
+        }
     }
 }

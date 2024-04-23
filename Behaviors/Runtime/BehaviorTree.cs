@@ -1,8 +1,7 @@
-﻿using System.Linq;
-using Ayla.Behaviors.Runtime.Tasks;
-using Ayla.Behaviors.Runtime.Utilities;
-using Ayla.Inspector.Runtime.Utilities;
+﻿using Ayla.Behaviors.Runtime.Tasks;
+using Ayla.Inspector.Editor;
 using Ayla.Inspector.SpecialCase;
+using Ayla.Inspector.Utilities;
 using UnityEditor;
 using UnityEngine;
 
@@ -54,11 +53,7 @@ namespace Ayla.Behaviors.Runtime
                 return;
             }
 
-            status = Task.ExecuteLateUpdate(m_RootTask);
-            if (status != TaskStatus.Running)
-            {
-                return;
-            }
+            Task.ExecuteLateUpdate(m_RootTask);
         }
 
         private void OnEnable()
@@ -117,24 +112,24 @@ namespace Ayla.Behaviors.Runtime
             }
         }
 
-        [CustomInspector(nameof(validateInspectorHeight))]
+        [CustomInspector]
         private void ValidateInspector()
         {
             if (HasError(out var errorId))
             {
                 using var scope = Scopes.ColorScope(Color.red);
-                EditorGUILayout.LabelField("Invalid");
+                CustomInspectorLayout.LabelField("Invalid");
                 switch (errorId)
                 {
                     case ErrorId.NoEntryTask:
-                        EditorGUILayout.LabelField("There is no entry task in BehaviorTree.");
+                        CustomInspectorLayout.LabelField("There is no entry task in BehaviorTree.");
                         break;
                 }
             }
             else
             {
                 using var scope = Scopes.ColorScope(Color.green);
-                EditorGUILayout.LabelField("Validate");
+                CustomInspectorLayout.LabelField("Validate");
             }
         }
 #endif

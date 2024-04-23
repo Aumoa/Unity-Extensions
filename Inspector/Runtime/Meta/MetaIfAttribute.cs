@@ -1,6 +1,8 @@
-﻿namespace Ayla.Inspector.Meta
+﻿using Ayla.Inspector.SpecialCase;
+
+namespace Ayla.Inspector.Meta
 {
-    public abstract class MetaIfAttribute : MetaAttribute
+    public abstract class MetaIfAttribute : MetaAttribute, IIfAttribute
     {
         public string name { get; set; }
 
