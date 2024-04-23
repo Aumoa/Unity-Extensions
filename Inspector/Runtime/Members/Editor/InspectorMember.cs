@@ -89,6 +89,34 @@ namespace Ayla.Inspector.Editor.Members
             }
         }
 
+        public virtual void HandleOnValueChanged()
+        {
+            var attr = GetCustomAttribute<OnValueChangedAttribute>();
+            if (attr != null)
+            {
+                object ownedObject = GetParent().GetValue();
+                if (ownedObject != null)
+                {
+                    const BindingFlags k_BindingFlags =
+                        BindingFlags.DeclaredOnly |
+                        BindingFlags.Instance | BindingFlags.Static |
+                        BindingFlags.Public | BindingFlags.NonPublic |
+                        BindingFlags.InvokeMethod;
+
+                    foreach (var methodInfo in ownedObject.GetType().GetMethods(k_BindingFlags))
+                    {
+                        if (methodInfo.Name == attr.methodName && methodInfo.GetParameters().Length == 0)
+                        {
+                            methodInfo.Invoke(ownedObject, Array.Empty<object>());
+                            return;
+                        }
+                    }
+                }
+
+                Debug.LogWarningFormat("Suitable callback method not found. MemberPath: {0}", propertyPath);
+            }
+        }
+
         public virtual Attribute[] GetCustomAttributes(Type type, bool inherit = false)
         {
             return (Attribute[])(m_MemberInfo?.GetCustomAttributes(type) ?? Array.Empty<Attribute>());

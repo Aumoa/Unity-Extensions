@@ -106,6 +106,11 @@ namespace Ayla.Inspector.Members.Editor
             return ((FieldInfo)GetMemberInfo()).FieldType;
         }
 
+        public override void HandleOnValueChanged()
+        {
+            InspectorDrawer.RegisterCallbackOnApplyModifies(base.HandleOnValueChanged);
+        }
+
         public InspectorMember[] children
         {
             get

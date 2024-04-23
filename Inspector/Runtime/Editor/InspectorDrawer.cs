@@ -23,6 +23,7 @@ namespace Ayla.Inspector.Editor
         private readonly Dictionary<string, ReorderableList> s_ReorderableLists = new();
         
         private InspectorSerializedObjectMember m_InspectorMember;
+        private Action m_CallbacksOnApplyModifies;
 
         public static Rect OnGUI_Element(InspectorMember inspectorMember, Rect position, bool isLayout)
         {
@@ -43,8 +44,14 @@ namespace Ayla.Inspector.Editor
             }
             else
             {
+                using var scope = Scopes.ChangedScope();
                 float spacing = EditorGUIUtility.standardVerticalSpacing;
                 inspectorMember.OnGUI(position, inspectorMember.label);
+                if (GUI.changed)
+                {
+                    inspectorMember.HandleOnValueChanged();
+                }
+
                 spacing += position.height;
 
                 if (isLayout && inspectorMember is not InspectorScriptMember)
@@ -108,6 +115,11 @@ namespace Ayla.Inspector.Editor
             return height;
         }
 
+        public static void RegisterCallbackOnApplyModifies(Action callback)
+        {
+            current.m_CallbacksOnApplyModifies += callback;
+        }
+
         public override void OnInspectorGUI()
         {
             current = this;
@@ -132,6 +144,17 @@ namespace Ayla.Inspector.Editor
                 m_InspectorMember = null;
                 s_ReorderableLists.Clear();
             }
+        }
+
+        private bool UpdateAndDrawInspectorGUI(SerializedObject serializedObject, Action drawer)
+        {
+            serializedObject.Update();
+            drawer?.Invoke();
+            bool hasModified = serializedObject.ApplyModifiedProperties();
+            var callbacks = m_CallbacksOnApplyModifies;
+            m_CallbacksOnApplyModifies = null;
+            callbacks?.Invoke();
+            return hasModified;
         }
 
         public static float EvaluateDecorators(Rect position, InspectorMember inspectorMember, bool isLayout, bool doRender)
@@ -182,13 +205,6 @@ namespace Ayla.Inspector.Editor
         private static void Initialize()
         {
             current = null;
-        }
-
-        private static bool UpdateAndDrawInspectorGUI(SerializedObject serializedObject, Action drawer)
-        {
-            serializedObject.Update();
-            drawer?.Invoke();
-            return serializedObject.ApplyModifiedProperties();
         }
 
         public static bool IsExpanded(InspectorMember member)
