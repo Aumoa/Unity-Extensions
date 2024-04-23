@@ -75,7 +75,7 @@ namespace Ayla.Inspector.Members.Editor
             list.elementHeightCallback += index => InspectorDrawer.GetHeight_Element(children[index]);
             list.drawElementCallback += (position, index, _, _) =>
             {
-                position.x += 10.0f;
+                position = EditorStyles.inspectorDefaultMargins.ApplyMarginsLeft(position);
                 if (children.Length <= index)
                 {
                     m_CachedChildren = null;
