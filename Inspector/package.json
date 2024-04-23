@@ -5,7 +5,7 @@
 		"name": "Aumoa",
 		"url": "https://github.com/Aumoa"
 	},
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"unity": "2018.4",
 	"description": "High-performance Inspector Utility",
 	"keywords": ["Inspector"],
