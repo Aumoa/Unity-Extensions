@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Ayla.Inspector.Utilities
 {
@@ -76,6 +77,28 @@ namespace Ayla.Inspector.Utilities
 
             value = default;
             return false;
+        }
+
+        public static bool IsValidIndex<T>(this IList<T> source, int index)
+        {
+            return index >= 0 && source.Count > index;
+        }
+
+        public static T GetOrDefault<T>(this IList<T> source, int index)
+        {
+            return IsValidIndex(source, index) ? source[index] : default;
+        }
+
+        public static T[] AsArray<T>(this IList<T> source)
+        {
+            if (source is T[] array)
+            {
+                return array;
+            }
+            else
+            {
+                return source.ToArray();
+            }
         }
     }
 }

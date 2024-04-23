@@ -240,7 +240,11 @@ namespace Ayla.Inspector.Editor
             }
             else
             {
-                var dict = serializedProperties.ToDictionary(p => p.name, p => p);
+                Dictionary<string, SerializedProperty> dict = new();
+                foreach (var property in serializedProperties)
+                {
+                    dict.TryAdd(property.name, property);
+                }
 
                 if (dict.TryGetValue("m_Script", out var scriptMember))
                 {
