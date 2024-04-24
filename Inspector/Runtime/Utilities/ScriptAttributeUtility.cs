@@ -122,6 +122,7 @@ namespace Ayla.Inspector.Utilities
             {
                 if (InternalInstantiateDrawer(in s_NativePropertyDrawerCache, attribute.GetType()) is NativePropertyDrawer drawer)
                 {
+                    drawer.m_Attribute = attribute;
                     return drawer;
                 }
             }
@@ -129,6 +130,7 @@ namespace Ayla.Inspector.Utilities
             {
                 if (InternalInstantiateDrawer(in s_NativePropertyDrawerCache, targetType) is NativePropertyDrawer drawer)
                 {
+                    drawer.m_Attribute = null;
                     return drawer;
                 }
             }

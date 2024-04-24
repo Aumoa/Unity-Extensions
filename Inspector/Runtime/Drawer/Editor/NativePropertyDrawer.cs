@@ -10,6 +10,10 @@ namespace Ayla.Inspector.Drawer.Editor
     {
         private static GUIContent s_NullContent;
 
+        internal Attribute m_Attribute;
+
+        protected Attribute attribute => m_Attribute;
+
         public virtual void OnGUI(Rect position, InspectorMember property, GUIContent label)
         {
             if (property.isExpandable)
