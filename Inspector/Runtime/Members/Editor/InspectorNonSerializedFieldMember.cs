@@ -23,7 +23,7 @@ namespace Ayla.Inspector.Members.Editor
             : base(parent, unityObject, getter, setter, fieldInfo, pathName)
         {
             m_FieldInfo = fieldInfo;
-            m_Drawer = ScriptAttributeUtility.InstantiateNativePropertyDrawer(fieldInfo.FieldType);
+            m_Drawer = ScriptAttributeUtility.InstantiateNativePropertyDrawerForChain(fieldInfo.FieldType, fieldInfo.GetCustomAttributes<PropertyAttribute>());
         }
 
         private void CacheChildren()

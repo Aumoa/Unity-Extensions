@@ -24,7 +24,7 @@ namespace Ayla.Inspector.Members.Editor
             : base(parent, unityObject, getter, setter, propertyInfo, pathName)
         {
             m_PropertyInfo = propertyInfo;
-            m_Drawer = ScriptAttributeUtility.InstantiateNativePropertyDrawer(propertyInfo.PropertyType);
+            m_Drawer = ScriptAttributeUtility.InstantiateNativePropertyDrawerForChain(propertyInfo.PropertyType, propertyInfo.GetCustomAttributes<PropertyAttribute>());
         }
 
         private void CacheChildren()
@@ -122,6 +122,6 @@ namespace Ayla.Inspector.Members.Editor
 
         public override bool isList => m_PropertyInfo.PropertyType == typeof(IList) || m_PropertyInfo.PropertyType.IsSubclassOf(typeof(IList));
 
-        public override bool isVisible => HasCustomAttribute<ShowNativeMemberAttribute>();
+        public override bool isVisible => HasCustomAttribute<ShowNativeMemberAttribute>() && base.isVisible;
     }
 }

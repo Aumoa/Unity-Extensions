@@ -1,10 +1,10 @@
 ﻿namespace Ayla.Inspector.Decorator
 {
-    public class HeaderAttribute : DecoratorAttribute
+    public class HeaderNameAttribute : DecoratorAttribute
     {
         public string name { get; }
         
-        public HeaderAttribute(string name)
+        public HeaderNameAttribute(string name)
         {
             this.name = name;
         }

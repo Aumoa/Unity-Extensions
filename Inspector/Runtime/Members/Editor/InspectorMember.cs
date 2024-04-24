@@ -231,6 +231,28 @@ namespace Ayla.Inspector.Editor.Members
             }
         }
 
+        public virtual int indentLevel
+        {
+            get
+            {
+                int sum = 0;
+                foreach (var indentAttribute in GetCustomAttributes<IndentAttribute>())
+                {
+                    sum += indentAttribute.indentLevel;
+                }
+
+                foreach (var indentIfAttribute in GetCustomAttributes<IndentIfAttribute>())
+                {
+                    if (IsConditionalPass(indentIfAttribute))
+                    {
+                        sum += indentIfAttribute.indentLevel;
+                    }
+                }
+
+                return sum;
+            }
+        }
+
         public bool IsConditionalPass<T>(T attribute) where T : IIfAttribute
         {
             return IsConditionalPass(siblings, attribute);

@@ -1,15 +1,14 @@
 ﻿using UnityEditor;
 using UnityEngine;
-using HeaderAttribute = Ayla.Inspector.Decorator.HeaderAttribute;
 
 namespace Ayla.Inspector.Decorator.Editor
 {
-    [CustomPropertyDrawer(typeof(HeaderAttribute))]
-    public class HeaderDecoratorDrawer : DecoratorDrawer
+    [CustomPropertyDrawer(typeof(HeaderNameAttribute))]
+    public class HeaderNameDecoratorDrawer : DecoratorDrawer
     {
         public override void OnGUI(Rect position)
         {
-            if (attribute is HeaderAttribute headerAttribute)
+            if (attribute is HeaderNameAttribute headerAttribute)
             {
                 GUI.Label(position, headerAttribute.name, EditorStyles.boldLabel);
             }

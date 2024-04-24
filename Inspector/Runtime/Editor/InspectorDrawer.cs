@@ -37,6 +37,7 @@ namespace Ayla.Inspector.Editor
 
             bool isDisabled = !inspectorMember.isEditable || !inspectorMember.isEnabled;
             using var disabledScope = new EditorGUI.DisabledScope(disabled: isDisabled);
+            using var indent = Scopes.IndentLevelScope(inspectorMember.indentLevel);
             bool isInline = inspectorMember.isInline;
             if (isInline)
             {
@@ -79,7 +80,7 @@ namespace Ayla.Inspector.Editor
                 }
                 else
                 {
-                    using var indentScope = Scopes.IndentLevelScope(isInline ? 0 : 1);
+                    using var innerIndent = Scopes.IndentLevelScope(isInline ? 0 : 1);
                     foreach (var child in inspectorMember.GetChildren())
                     {
                         position = OnGUI_Element(child, position, isLayout);
@@ -90,24 +91,25 @@ namespace Ayla.Inspector.Editor
             return position;
         }
 
-        public static float GetHeight_Element(InspectorMember aylaMember)
+        public static float GetHeight_Element(InspectorMember inspectorMember)
         {
-            if (aylaMember.isVisible == false)
+            if (inspectorMember.isVisible == false)
             {
                 return 0;
             }
 
-            float height = aylaMember.GetHeight();
-            if (aylaMember.isExpanded)
+            currentHandled = inspectorMember;
+            float height = inspectorMember.GetHeight();
+            if (inspectorMember.isExpanded)
             {
-                if (aylaMember.isList)
+                if (inspectorMember.isList)
                 {
-                    var list = GetReorderableList(aylaMember);
+                    var list = GetReorderableList(inspectorMember);
                     height += list.GetHeight();
                 }
                 else
                 {
-                    height += aylaMember.GetChildren()
+                    height += inspectorMember.GetChildren()
                         .Select(p => GetHeight_Element(p) + EditorGUIUtility.standardVerticalSpacing)
                         .Sum() - EditorGUIUtility.standardVerticalSpacing;
                 }

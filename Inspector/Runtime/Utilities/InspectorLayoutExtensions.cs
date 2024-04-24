@@ -13,6 +13,15 @@ namespace Ayla.Inspector.Utilities
             position.height -= style.margin.vertical + style.padding.vertical;
             return position;
         }
+        
+        public static Rect RevertMargins(this GUIStyle style, Rect position)
+        {
+            position.x -= style.margin.left + style.padding.left;
+            position.y -= style.margin.top + style.padding.top;
+            position.width += style.margin.horizontal + style.padding.horizontal;
+            position.height += style.margin.vertical + style.padding.vertical;
+            return position;
+        }
 
         public static Rect ApplyMarginsLeft(this GUIStyle style, Rect position)
         {

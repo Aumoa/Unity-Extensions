@@ -45,6 +45,19 @@ namespace Ayla.Inspector.Editor
             }
         }
 
+        public static Object ObjectField(Object unityObject, Type objectType, bool allowSceneObjects)
+        {
+            ApplySpacing(EditorGUIUtility.singleLineHeight, EditorGUIUtility.standardVerticalSpacing);
+            if (renderMode)
+            {
+                return EditorGUILayout.ObjectField(unityObject, objectType, allowSceneObjects);
+            }
+            else
+            {
+                return unityObject;
+            }
+        }
+
         public static Object ObjectField(string label, Object unityObject, Type objectType, bool allowSceneObjects)
         {
             ApplySpacing(EditorGUIUtility.singleLineHeight, EditorGUIUtility.standardVerticalSpacing);
@@ -69,6 +82,28 @@ namespace Ayla.Inspector.Editor
             {
                 return index;
             }
+        }
+
+        public static string TextField(string label, string value)
+        {
+            ApplySpacing(EditorGUIUtility.singleLineHeight, EditorGUIUtility.standardVerticalSpacing);
+            if (renderMode)
+            {
+                return EditorGUILayout.TextField(label, value);
+            }
+
+            return value;
+        }
+
+        public static Vector3 Vector3Field(string label, in Vector3 value)
+        {
+            ApplySpacing(EditorGUIUtility.singleLineHeight, EditorGUIUtility.standardVerticalSpacing);
+            if (renderMode)
+            {
+                return EditorGUILayout.Vector3Field(label, value);
+            }
+
+            return value;
         }
 
         public static int IntField(string label, int value)
@@ -122,6 +157,28 @@ namespace Ayla.Inspector.Editor
             return value;
         }
 
+        public static int IntSlider(string label, int value, int minValue, int maxValue)
+        {
+            ApplySpacing(EditorGUIUtility.singleLineHeight, EditorGUIUtility.standardVerticalSpacing);
+            if (renderMode)
+            {
+                return EditorGUILayout.IntSlider(label, value, minValue, maxValue);
+            }
+
+            return value;
+        }
+
+        public static int IntSlider(int value, int minValue, int maxValue)
+        {
+            ApplySpacing(EditorGUIUtility.singleLineHeight, EditorGUIUtility.standardVerticalSpacing);
+            if (renderMode)
+            {
+                return EditorGUILayout.IntSlider(value, minValue, maxValue);
+            }
+
+            return value;
+        }
+
         public static Color ColorField(string label, Color value)
         {
             ApplySpacing(EditorGUIUtility.singleLineHeight, EditorGUIUtility.standardVerticalSpacing);
@@ -136,6 +193,10 @@ namespace Ayla.Inspector.Editor
         public static void Space(float width)
         {
             ApplySpacing(width, 0);
+            if (renderMode)
+            {
+                EditorGUILayout.Space(width);
+            }
         }
 
         public static bool BeginFoldoutHeaderGroup(bool value, string label)
@@ -161,8 +222,7 @@ namespace Ayla.Inspector.Editor
 
         public static bool Button(string text)
         {
-            var height = GUI.skin.button.margin.vertical + GUI.skin.button.padding.vertical + EditorGUIUtility.singleLineHeight;
-            ApplySpacing(height + EditorGUIUtility.singleLineHeight, EditorGUIUtility.standardVerticalSpacing);
+            ApplySpacing(EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing, EditorGUIUtility.standardVerticalSpacing);
             if (renderMode)
             {
                 return GUILayout.Button(text);

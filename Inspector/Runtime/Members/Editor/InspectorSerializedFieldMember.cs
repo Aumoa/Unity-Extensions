@@ -2,6 +2,7 @@
 using System.Reflection;
 using Ayla.Inspector.Editor;
 using Ayla.Inspector.Editor.Members;
+using Ayla.Inspector.Meta;
 using Ayla.Inspector.Utilities;
 using UnityEditor;
 using UnityEditorInternal;
@@ -58,6 +59,9 @@ namespace Ayla.Inspector.Members.Editor
         {
             if (isList)
             {
+                float spacing = InspectorDrawer.EvaluateDecorators(rect, this, false, true);
+                rect.y += spacing;
+                rect.height -= spacing;
                 m_SerializedProperty.isExpanded = EditorGUI.Foldout(rect, m_SerializedProperty.isExpanded, label, s_FoldoutStyle);
             }
             else
@@ -130,7 +134,19 @@ namespace Ayla.Inspector.Members.Editor
 
         public override string name => m_SerializedProperty.name;
 
-        public override string displayName => m_SerializedProperty.displayName;
+        public override string displayName
+        {
+            get
+            {
+                var attribute = GetCustomAttribute<LabelAttribute>();
+                if (attribute != null)
+                {
+                    return attribute.labelName;
+                }
+
+                return m_SerializedProperty.displayName;
+            }
+        }
 
         public override bool isEditable => m_SerializedProperty.editable;
 

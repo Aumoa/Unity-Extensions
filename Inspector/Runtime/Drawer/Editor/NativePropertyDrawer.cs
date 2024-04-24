@@ -6,7 +6,6 @@ using Object = UnityEngine.Object;
 
 namespace Ayla.Inspector.Drawer.Editor
 {
-    [CustomNativePropertyDrawer(typeof(object), useForChildren: true)]
     public class NativePropertyDrawer
     {
         private static GUIContent s_NullContent;

@@ -116,11 +116,25 @@ namespace Ayla.Inspector.Utilities
             }
         }
 
-        public static PropertyDrawer InstantiatePropertyDrawer(Type targetType)
-            => InternalInstantiateDrawer(in s_PropertyDrawerCache, targetType) as PropertyDrawer;
+        public static NativePropertyDrawer InstantiateNativePropertyDrawerForChain(Type targetType, IEnumerable<PropertyAttribute> attributes)
+        {
+            foreach (var attribute in attributes)
+            {
+                if (InternalInstantiateDrawer(in s_NativePropertyDrawerCache, attribute.GetType()) is NativePropertyDrawer drawer)
+                {
+                    return drawer;
+                }
+            }
 
-        public static NativePropertyDrawer InstantiateNativePropertyDrawer(Type targetType)
-            => InternalInstantiateDrawer(in s_NativePropertyDrawerCache, targetType) as NativePropertyDrawer;
+            {
+                if (InternalInstantiateDrawer(in s_NativePropertyDrawerCache, targetType) is NativePropertyDrawer drawer)
+                {
+                    return drawer;
+                }
+            }
+
+            return new NativePropertyDrawer();
+        }
 
         public static DecoratorDrawer InstantiateDecoratorDrawer(PropertyAttribute propertyAttribute)
         {

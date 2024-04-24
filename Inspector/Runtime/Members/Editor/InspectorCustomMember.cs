@@ -2,6 +2,7 @@
 using System.Reflection;
 using Ayla.Inspector.Editor;
 using Ayla.Inspector.Editor.Members;
+using Ayla.Inspector.Utilities;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
@@ -55,7 +56,8 @@ namespace Ayla.Inspector.Members.Editor
             }
 
             var ownedObject = GetParent().GetValue();
-            GUILayout.BeginArea(rect);
+            rect = EditorStyles.inspectorDefaultMargins.RevertMargins(rect);
+            GUILayout.BeginArea(rect, EditorStyles.inspectorDefaultMargins);
             CustomInspectorLayout.BeginLayout(true);
             if (InvokeMethod(ownedObject, rect, label))
             {

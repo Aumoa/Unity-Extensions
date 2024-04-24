@@ -138,6 +138,42 @@ namespace Ayla.Inspector.Editor
             return new InspectorSerializedObjectMember(parent, unityObject, serializedObject, pathName);
         }
 
+        private static void SortInspectorMembers(List<InspectorMember> inoutMembers)
+        {
+            var orders = ListUtility.AcquireScoped<(InspectorMember, OrderAttribute)>();
+
+            foreach (var member in inoutMembers)
+            {
+                var attribute = member.GetCustomAttribute<OrderAttribute>();
+                if (attribute != null)
+                {
+                    orders.m_Source.Add((member, attribute));
+                }
+            }
+
+            foreach (var (member, order) in orders.m_Source)
+            {
+                if (order is OrderBeforeAttribute orderBefore)
+                {
+                    inoutMembers.Remove(member);
+                    int indexOf = inoutMembers.FindIndex(p => p.name == orderBefore.memberName);
+                    if (indexOf != -1)
+                    {
+                        inoutMembers.Insert(indexOf, member);
+                    }
+                }
+                else if (order is OrderAfterAttribute orderAfter)
+                {
+                    inoutMembers.Remove(member);
+                    int indexOf = inoutMembers.FindIndex(p => p.name == orderAfter.memberName);
+                    if (indexOf != -1)
+                    {
+                        inoutMembers.Insert(indexOf + 1, member);
+                    }
+                }
+            }
+        }
+
         public static InspectorMember[] GetInspectorChildren(this object targetObject, Object unityObject, InspectorMember parent, IEnumerable<SerializedProperty> serializedProperties)
         {
             var list = ListUtility.AcquireScoped<InspectorMember>();
@@ -167,43 +203,13 @@ namespace Ayla.Inspector.Editor
             int insertIndex = 1;
             foreach (var group in groups.m_Source)
             {
+                SortInspectorMembers(group.list);
                 var inspectorGroup = new InspectorGroup(parent, unityObject, group.name, group.name, group.list.ToArray());
                 list.m_Source.Insert(insertIndex++, inspectorGroup);
                 ListUtility.Release(group.list);
             }
-
-            var orders = ListUtility.AcquireScoped<(InspectorMember, OrderAttribute)>();
-            foreach (var member in list.m_Source)
-            {
-                var attribute = member.GetCustomAttribute<OrderAttribute>();
-                if (attribute != null)
-                {
-                    orders.m_Source.Add((member, attribute));
-                }
-            }
-
-            foreach (var (member, order) in orders.m_Source)
-            {
-                if (order is OrderBeforeAttribute orderBefore)
-                {
-                    list.m_Source.Remove(member);
-                    int indexOf = list.m_Source.FindIndex(p => p.name == orderBefore.memberName);
-                    if (indexOf != -1)
-                    {
-                        list.m_Source.Insert(indexOf, member);
-                    }
-                }
-                else if (order is OrderAfterAttribute orderAfter)
-                {
-                    list.m_Source.Remove(member);
-                    int indexOf = list.m_Source.FindIndex(p => p.name == orderAfter.memberName);
-                    if (indexOf != -1)
-                    {
-                        list.m_Source.Insert(indexOf + 1, member);
-                    }
-                }
-            }
-
+            
+            SortInspectorMembers(list.m_Source);
             return list.m_Source.ToArray();
         }
 

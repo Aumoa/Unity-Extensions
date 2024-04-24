@@ -22,7 +22,7 @@ namespace Ayla.Inspector.Editor.Members
             : base(parent, unityObject, getter, null, methodInfo, pathName)
         {
             m_MethodInfo = methodInfo;
-            m_Drawer = ScriptAttributeUtility.InstantiateNativePropertyDrawer(methodInfo.ReturnType);
+            m_Drawer = ScriptAttributeUtility.InstantiateNativePropertyDrawerForChain(methodInfo.ReturnType, methodInfo.GetCustomAttributes<PropertyAttribute>());
         }
 
         private void CacheChildren()
