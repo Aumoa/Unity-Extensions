@@ -1,0 +1,17 @@
+{
+	"name": "com.aylaextensions.numerics",
+	"displayName": "AylaNumerics",
+	"author": {
+		"name": "Aumoa",
+		"url": "https://github.com/Aumoa"
+	},
+	"version": "0.1.0",
+	"unity": "2018.4",
+	"description": "Vector, Matrix, etc...",
+	"keywords": ["Vector", "Matrix", "Mathemtaics"],
+	"license": "MIT",
+	"category": "Numerics",
+	"dependencies": {
+		"com.aylaextensions.inspector": "git@github.com:Aumoa/Unity-Extensions.git?path=Numerics"
+	}
+}
