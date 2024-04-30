@@ -1,19 +1,19 @@
 using System;
-using System.Runtime.CompilerServices;
 using Ayla.Numerics.Utility;
+using System.Runtime.CompilerServices;
 
 namespace Ayla.Numerics
 {
     [Serializable]
-    public struct Vector2D : IVector2, IEquatable<Vector2D>
+    public struct Shear2D : IVector2, IEquatable<Shear2D>
     {
         public double x;
         public double y;
 
-        public static Vector2D identity
+        public static Shear2D identity
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => Vector2Utility.Make<Vector2D>(0, 0);
+            get => Vector2Utility.Make<Shear2D>(0, 1);
         }
 
         double IVector2.x
@@ -39,51 +39,51 @@ namespace Ayla.Numerics
         public override int GetHashCode() => Vector2Utility.GetHashCode(this);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly bool Equals(Vector2D rhs) => Vector2Utility.NearlyEquals(this, rhs);
+        public readonly bool Equals(Shear2D rhs) => Vector2Utility.NearlyEquals(this, rhs);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly void Deconstruct(out double x, out double y) => Vector2Utility.Deconstruct(this, out x, out y);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector2D operator +(in Vector2D lhs, in Vector2D rhs) => Vector2Utility.Add(lhs, rhs);
+        public static Shear2D operator +(in Shear2D lhs, in Shear2D rhs) => Vector2Utility.Add(lhs, rhs);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector2D operator -(in Vector2D lhs, in Vector2D rhs) => Vector2Utility.Subtract(lhs, rhs);
+        public static Shear2D operator -(in Shear2D lhs, in Shear2D rhs) => Vector2Utility.Subtract(lhs, rhs);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector2D operator -(in Vector2D lhs) => Vector2Utility.Inverse(lhs);
+        public static Shear2D operator -(in Shear2D lhs) => Vector2Utility.Inverse(lhs);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector2D operator *(in Vector2D lhs, in Vector2D rhs) => Vector2Utility.Multiply(lhs, rhs);
+        public static Shear2D operator *(in Shear2D lhs, in Shear2D rhs) => Vector2Utility.Multiply(lhs, rhs);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector2D operator *(in Vector2D lhs, double rhs) => Vector2Utility.Multiply(lhs, rhs);
+        public static Shear2D operator *(in Shear2D lhs, double rhs) => Vector2Utility.Multiply(lhs, rhs);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector2D operator *(double lhs, in Vector2D rhs) => Vector2Utility.Multiply(lhs, rhs);
+        public static Shear2D operator *(double lhs, in Shear2D rhs) => Vector2Utility.Multiply(lhs, rhs);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector2D operator /(in Vector2D lhs, in Vector2D rhs) => Vector2Utility.Divide(lhs, rhs);
+        public static Shear2D operator /(in Shear2D lhs, in Shear2D rhs) => Vector2Utility.Divide(lhs, rhs);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector2D operator /(in Vector2D lhs, double rhs) => Vector2Utility.Divide(lhs, rhs);
+        public static Shear2D operator /(in Shear2D lhs, double rhs) => Vector2Utility.Divide(lhs, rhs);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector2D operator /(double lhs, in Vector2D rhs) => Vector2Utility.Divide(lhs, rhs);
+        public static Shear2D operator /(double lhs, in Shear2D rhs) => Vector2Utility.Divide(lhs, rhs);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector2D operator %(in Vector2D lhs, in Vector2D rhs) => Vector2Utility.Mod(lhs, rhs);
+        public static Shear2D operator %(in Shear2D lhs, in Shear2D rhs) => Vector2Utility.Mod(lhs, rhs);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector2D operator %(in Vector2D lhs, double rhs) => Vector2Utility.Mod(lhs, rhs);
+        public static Shear2D operator %(in Shear2D lhs, double rhs) => Vector2Utility.Mod(lhs, rhs);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector2D operator %(double lhs, in Vector2D rhs) => Vector2Utility.Mod(lhs, rhs);
+        public static Shear2D operator %(double lhs, in Shear2D rhs) => Vector2Utility.Mod(lhs, rhs);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(in Vector2D lhs, in Vector2D rhs) => Vector2Utility.NearlyEquals(lhs, rhs);
+        public static bool operator ==(in Shear2D lhs, in Shear2D rhs) => Vector2Utility.NearlyEquals(lhs, rhs);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(in Vector2D lhs, in Vector2D rhs) => !Vector2Utility.NearlyEquals(lhs, rhs);
+        public static bool operator !=(in Shear2D lhs, in Shear2D rhs) => !Vector2Utility.NearlyEquals(lhs, rhs);
     }
 }

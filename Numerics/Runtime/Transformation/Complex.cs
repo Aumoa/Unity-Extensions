@@ -5,10 +5,16 @@ using System.Runtime.CompilerServices;
 namespace Ayla.Numerics
 {
     [Serializable]
-    public struct Complex : IVector2
+    public struct Complex : IVector2, IEquatable<Complex>
     {
         public double x;
         public double y;
+
+        public static Complex identity
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => Vector2Utility.Make<Complex>(0, 1);
+        }
 
         double IVector2.x
         {
@@ -27,81 +33,57 @@ namespace Ayla.Numerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override readonly bool Equals(object rhs)
-        {
-            if (rhs is IVector2 v)
-            {
-                return Vector2Utility.NearlyEquals(this, v);
-            }
-
-            return false;
-        }
+        public override readonly bool Equals(object rhs) => Vector2Utility.Equals(this, rhs);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(x, y);
-        }
+        public override int GetHashCode() => Vector2Utility.GetHashCode(this);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly bool Equals(Complex rhs)
-        {
-            return Vector2Utility.NearlyEquals(this, rhs);
-        }
+        public readonly bool Equals(Complex rhs) => Vector2Utility.NearlyEquals(this, rhs);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly void Deconstruct(out double x, out double y)
-        {
-            x = this.x;
-            y = this.y;
-        }
+        public readonly void Deconstruct(out double x, out double y) => Vector2Utility.Deconstruct(this, out x, out y);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Complex operator +(in Complex lhs, in Complex rhs)
-        {
-            return Vector2Utility.Add(lhs, rhs);
-        }
+        public static Complex operator +(in Complex lhs, in Complex rhs) => Vector2Utility.Add(lhs, rhs);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Complex operator -(in Complex lhs, in Complex rhs)
-        {
-            return Vector2Utility.Subtract(lhs, rhs);
-        }
+        public static Complex operator -(in Complex lhs, in Complex rhs) => Vector2Utility.Subtract(lhs, rhs);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Complex operator -(in Complex lhs)
-        {
-            return Vector2Utility.Inverse(lhs);
-        }
+        public static Complex operator -(in Complex lhs) => Vector2Utility.Inverse(lhs);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Complex operator *(in Complex lhs, in Complex rhs)
-        {
-            return Vector2Utility.Multiply(lhs, rhs);
-        }
+        public static Complex operator *(in Complex lhs, in Complex rhs) => Vector2Utility.Multiply(lhs, rhs);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Complex operator /(in Complex lhs, in Complex rhs)
-        {
-            return Vector2Utility.Divide(lhs, rhs);
-        }
+        public static Complex operator *(in Complex lhs, double rhs) => Vector2Utility.Multiply(lhs, rhs);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Complex operator %(in Complex lhs, in Complex rhs)
-        {
-            return Vector2Utility.Mod(lhs, rhs);
-        }
+        public static Complex operator *(double lhs, in Complex rhs) => Vector2Utility.Multiply(lhs, rhs);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(in Complex lhs, in Complex rhs)
-        {
-            return Vector2Utility.NearlyEquals(lhs, rhs);
-        }
+        public static Complex operator /(in Complex lhs, in Complex rhs) => Vector2Utility.Divide(lhs, rhs);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(in Complex lhs, in Complex rhs)
-        {
-            return !Vector2Utility.NearlyEquals(lhs, rhs);
-        }
+        public static Complex operator /(in Complex lhs, double rhs) => Vector2Utility.Divide(lhs, rhs);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Complex operator /(double lhs, in Complex rhs) => Vector2Utility.Divide(lhs, rhs);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Complex operator %(in Complex lhs, in Complex rhs) => Vector2Utility.Mod(lhs, rhs);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Complex operator %(in Complex lhs, double rhs) => Vector2Utility.Mod(lhs, rhs);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Complex operator %(double lhs, in Complex rhs) => Vector2Utility.Mod(lhs, rhs);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(in Complex lhs, in Complex rhs) => Vector2Utility.NearlyEquals(lhs, rhs);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(in Complex lhs, in Complex rhs) => !Vector2Utility.NearlyEquals(lhs, rhs);
     }
 }
