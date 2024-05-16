@@ -1,4 +1,4 @@
-namespace Ayla.Inspector.Editor
+namespace Avalon.Inspector
 {
     public static class RuntimeNamespaceBinder
     {

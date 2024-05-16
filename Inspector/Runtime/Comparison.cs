@@ -1,4 +1,4 @@
-﻿namespace Ayla.Inspector
+﻿namespace Avalon.Inspector
 {
     public enum Comparison
     {

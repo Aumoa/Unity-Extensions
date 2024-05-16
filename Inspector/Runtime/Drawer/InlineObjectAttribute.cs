@@ -1,6 +1,6 @@
 using System;
 
-namespace Ayla.Inspector.Drawer
+namespace Avalon.Inspector.Drawer
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method, AllowMultiple = false)]
     public class InlineObjectAttribute : InspectorAttribute

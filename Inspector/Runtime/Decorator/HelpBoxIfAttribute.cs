@@ -1,6 +1,6 @@
-using Ayla.Inspector.SpecialCase;
+using Avalon.Inspector.SpecialCase;
 
-namespace Ayla.Inspector.Decorator
+namespace Avalon.Inspector.Decorator
 {
     public class HelpBoxIfAttribute : DecoratorAttribute, IIfAttribute
     {

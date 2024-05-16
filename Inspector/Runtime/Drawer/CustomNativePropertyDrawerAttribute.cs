@@ -1,8 +1,6 @@
-﻿// Copyright 2020-2023 Aumoa.lib. All right reserved.
+﻿using System;
 
-using System;
-
-namespace Ayla.Inspector.Drawer
+namespace Avalon.Inspector.Drawer
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class CustomNativePropertyDrawerAttribute : Attribute

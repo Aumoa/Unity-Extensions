@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Ayla.Inspector.Meta
+namespace Avalon.Inspector.Meta
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method, AllowMultiple = true)]
     public abstract class VisibilityIfAttribute : InvertableIfAttribute

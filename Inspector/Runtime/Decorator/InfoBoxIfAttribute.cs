@@ -1,4 +1,4 @@
-namespace Ayla.Inspector.Decorator
+namespace Avalon.Inspector.Decorator
 {
     public class InfoBoxIfAttribute : HelpBoxIfAttribute
     {

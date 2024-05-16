@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace Ayla.Inspector.Decorator
+namespace Avalon.Inspector.Decorator
 {
     public class RequiredAttribute : ErrorBoxIfAttribute
     {

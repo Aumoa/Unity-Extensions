@@ -1,10 +1,9 @@
 using System;
-using UnityEditor;
 using UnityEngine;
 
-namespace Ayla.Inspector.Utilities
+namespace Avalon.Inspector.Utilities
 {
-    public static class Scopes
+    public static partial class Scopes
     {
         public readonly struct ColorScopeBuilder : IDisposable
         {
@@ -16,7 +15,7 @@ namespace Ayla.Inspector.Utilities
                 GUI.color = color;
             }
 
-            public readonly void Dispose()
+            public void Dispose()
             {
                 GUI.color = m_PreviousColor;
             }
@@ -25,27 +24,6 @@ namespace Ayla.Inspector.Utilities
         public static ColorScopeBuilder ColorScope(Color color)
         {
             return new ColorScopeBuilder(color);
-        }
-
-        public readonly struct IndentLevelScopeBuilder : IDisposable
-        {
-            private readonly int m_PreviousIndentLevel;
-
-            public IndentLevelScopeBuilder(int increaseIndentLevel)
-            {
-                m_PreviousIndentLevel = EditorGUI.indentLevel;
-                EditorGUI.indentLevel += increaseIndentLevel;
-            }
-
-            public readonly void Dispose()
-            {
-                EditorGUI.indentLevel = m_PreviousIndentLevel;
-            }
-        }
-
-        public static IndentLevelScopeBuilder IndentLevelScope(int increaseLevel)
-        {
-            return new IndentLevelScopeBuilder(increaseLevel);
         }
 
         public readonly struct HorizontalScopeBuilder : IDisposable
@@ -101,6 +79,27 @@ namespace Ayla.Inspector.Utilities
         public static ChangedScopeBuilder ChangedScope(bool ignoreCurrent = false)
         {
             return new ChangedScopeBuilder(GUI.changed, ignoreCurrent);
+        }
+
+        public readonly struct DisabledScopeBuilder : IDisposable
+        {
+            private readonly bool m_PreviousEnabled;
+
+            public DisabledScopeBuilder(bool disabled)
+            {
+                m_PreviousEnabled = GUI.enabled;
+                GUI.enabled = !disabled;
+            }
+
+            public void Dispose()
+            {
+                GUI.enabled = m_PreviousEnabled;
+            }
+        }
+
+        public static DisabledScopeBuilder DisabledScope(bool disabled = true)
+        {
+            return new DisabledScopeBuilder(disabled);
         }
     }
 }

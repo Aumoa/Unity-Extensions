@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Ayla.Inspector
+namespace Avalon.Inspector
 {
     public class InspectorAttribute : PropertyAttribute
     {

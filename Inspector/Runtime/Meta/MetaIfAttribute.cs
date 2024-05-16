@@ -1,6 +1,6 @@
-﻿using Ayla.Inspector.SpecialCase;
+﻿using Avalon.Inspector.SpecialCase;
 
-namespace Ayla.Inspector.Meta
+namespace Avalon.Inspector.Meta
 {
     public abstract class MetaIfAttribute : MetaAttribute, IIfAttribute
     {
