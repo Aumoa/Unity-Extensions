@@ -1,6 +1,6 @@
 using System;
 
-namespace Avalon.Inspector.Meta
+namespace Ayla.Inspector
 {
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Field | AttributeTargets.Property)]
     public class BoxGroupAttribute : MetaAttribute

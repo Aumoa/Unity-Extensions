@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using Ayla.Inspector.Meta;
+using Ayla.Inspector;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;

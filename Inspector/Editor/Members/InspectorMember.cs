@@ -3,15 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Avalon.Inspector.Meta;
-using Avalon.Inspector.SpecialCase;
-using Avalon.Inspector.Utilities;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Avalon.Inspector.Members
+namespace Ayla.Inspector
 {
     public abstract class InspectorMember
     {

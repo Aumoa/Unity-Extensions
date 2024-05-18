@@ -1,10 +1,9 @@
 #if UNITY_EDITOR
 using System;
-using Avalon.Inspector.Utilities;
 using UnityEditor;
 using UnityEngine;
 
-namespace Avalon.Inspector.Drawer
+namespace Ayla.Inspector
 {
     [CustomPropertyDrawer(typeof(ForceEnumAttribute))]
     public class ForceEnumPropertyDrawer : PropertyDrawer

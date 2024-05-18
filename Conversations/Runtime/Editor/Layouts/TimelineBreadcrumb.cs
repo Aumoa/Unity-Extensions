@@ -1,5 +1,5 @@
 using System;
-using Ayla.Inspector.Utilities;
+using Ayla.Inspector;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;

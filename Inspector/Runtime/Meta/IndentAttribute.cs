@@ -1,6 +1,6 @@
 using System;
 
-namespace Avalon.Inspector.Meta
+namespace Ayla.Inspector
 {
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Method)]
     public class IndentAttribute : MetaAttribute

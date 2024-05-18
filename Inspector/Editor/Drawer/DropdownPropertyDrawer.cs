@@ -1,10 +1,9 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
-using Avalon.Inspector.Utilities;
 using UnityEditor;
 using UnityEngine;
 
-namespace Avalon.Inspector.Drawer
+namespace Ayla.Inspector
 {
     [CustomPropertyDrawer(typeof(DropdownAttribute))]
     public class DropdownPropertyDrawer : PropertyDrawer

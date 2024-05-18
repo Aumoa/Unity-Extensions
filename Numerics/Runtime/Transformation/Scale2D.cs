@@ -9,6 +9,16 @@ namespace Ayla.Numerics
         public double x;
         public double y;
 
+        public readonly Scale2D Concatenate(in Scale2D rhs)
+        {
+            return this * rhs;
+        }
+
+        public readonly Vector2 TransformPoint<T>(in T rhs) where T : struct, IVector2
+        {
+            return Vector2Utility.Cast<Scale2D, Vector2>(Vector2Utility.Multiply(this, rhs));
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T2 Concatenate<T1, T2>(in T1 scale, in T2 value)
             where T1 : IVector2

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Avalon.Inspector.Meta
+namespace Ayla.Inspector
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method, AllowMultiple = true)]
     public class ShowIfAttribute : VisibilityIfAttribute

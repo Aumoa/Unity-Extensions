@@ -1,6 +1,6 @@
 using System;
 
-namespace Avalon.Inspector.Drawer
+namespace Ayla.Inspector
 {
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Property)]
     public class ForceEnumAttribute : InspectorAttribute

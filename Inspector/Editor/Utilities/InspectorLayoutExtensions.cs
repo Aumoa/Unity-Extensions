@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace Avalon.Inspector.Utilities
+namespace Ayla.Inspector
 {
     public static class InspectorLayoutExtensions
     {

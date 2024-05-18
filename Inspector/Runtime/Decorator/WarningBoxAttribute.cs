@@ -1,4 +1,4 @@
-namespace Avalon.Inspector.Decorator
+namespace Ayla.Inspector
 {
     public class WarningBoxAttribute : HelpBoxAttribute
     {

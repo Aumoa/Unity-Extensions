@@ -5,16 +5,6 @@ namespace Ayla.Numerics
 {
     public static class Vector2Utility
     {
-        public static class Cast<T> where T : struct, IVector2
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static T Do<U>(in U value)
-                where U : IVector2
-            {
-                return Make<T>(value.x, value.y);
-            }
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T Make<T>(double x, double y)
             where T : struct, IVector2
@@ -23,6 +13,12 @@ namespace Ayla.Numerics
             result.x = x;
             result.y = y;
             return result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T Cast<U, T>(in U value) where T : struct, IVector2 where U : IVector2
+        {
+            return Make<T>(value.x, value.y);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

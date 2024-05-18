@@ -2,7 +2,7 @@
 using System;
 using UnityEditor;
 
-namespace Avalon.Inspector.Utilities
+namespace Ayla.Inspector
 {
     public static partial class Scopes
     {

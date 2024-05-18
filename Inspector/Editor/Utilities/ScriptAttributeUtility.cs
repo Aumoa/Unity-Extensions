@@ -2,11 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Avalon.Inspector.Drawer;
 using UnityEditor;
 using UnityEngine;
 
-namespace Avalon.Inspector.Utilities
+namespace Ayla.Inspector
 {
     internal static class ScriptAttributeUtility
     {

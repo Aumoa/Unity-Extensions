@@ -1,10 +1,8 @@
 #if UNITY_EDITOR
-using Avalon.Inspector.Members;
-using Avalon.Inspector.Utilities;
 using UnityEditor;
 using UnityEngine;
 
-namespace Avalon.Inspector.Drawer
+namespace Ayla.Inspector
 {
     [CustomNativePropertyDrawer(typeof(InlineObjectAttribute))]
     public class InlineObjectNativePropertyDrawer : NativePropertyDrawer

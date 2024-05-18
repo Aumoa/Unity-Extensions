@@ -5,7 +5,7 @@ using UnityEditorInternal;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Avalon.Inspector.Members
+namespace Ayla.Inspector
 {
     public class InspectorClass : InspectorMember
     {

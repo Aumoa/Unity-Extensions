@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Avalon.Inspector.Drawer
+namespace Ayla.Inspector
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class CustomNativePropertyDrawerAttribute : Attribute

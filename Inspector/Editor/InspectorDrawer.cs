@@ -2,15 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Avalon.Inspector.Decorator;
-using Avalon.Inspector.Members;
-using Avalon.Inspector.Utilities;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Avalon.Inspector
+namespace Ayla.Inspector
 {
     [CustomEditor(typeof(Object), true)]
     [CanEditMultipleObjects]

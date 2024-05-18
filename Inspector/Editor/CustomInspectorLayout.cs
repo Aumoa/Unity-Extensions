@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Avalon.Inspector
+namespace Ayla.Inspector
 {
     public static class CustomInspectorLayout
     {

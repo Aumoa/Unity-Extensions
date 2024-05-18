@@ -3,7 +3,7 @@ using System;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Avalon.Inspector.Utilities
+namespace Ayla.Inspector
 {
     internal static class ReflectionUtility
     {

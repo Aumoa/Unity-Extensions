@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Avalon.Inspector.Meta
+namespace Ayla.Inspector
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method, AllowMultiple = false)]
     public class OrderAttribute : MetaAttribute

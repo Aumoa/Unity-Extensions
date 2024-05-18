@@ -3,7 +3,7 @@ using System;
 using UnityEditor;
 using UnityEngine;
 
-namespace Avalon.Inspector.Decorator
+namespace Ayla.Inspector
 {
     [CustomPropertyDrawer(typeof(HelpBoxIfAttribute), useForChildren: true)]
     public class HelpBoxIfDecoratorDrawer : DecoratorDrawer

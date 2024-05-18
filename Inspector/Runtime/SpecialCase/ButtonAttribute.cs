@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Avalon.Inspector.SpecialCase
+namespace Ayla.Inspector
 {
     [AttributeUsage(AttributeTargets.Method)]
     public class ButtonAttribute : SpecialCaseAttribute

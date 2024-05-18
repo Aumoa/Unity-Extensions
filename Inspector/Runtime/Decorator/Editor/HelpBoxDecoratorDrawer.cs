@@ -2,7 +2,7 @@ using System;
 using UnityEditor;
 using UnityEngine;
 
-namespace Ayla.Inspector.Decorator.Editor
+namespace Ayla.Inspector
 {
     [CustomPropertyDrawer(typeof(HelpBoxAttribute), useForChildren: true)]
     public class HelpBoxDecoratorDrawer : DecoratorDrawer

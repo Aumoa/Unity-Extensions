@@ -1,14 +1,12 @@
 ﻿#if UNITY_EDITOR
 using System;
 using System.Reflection;
-using Avalon.Inspector.Meta;
-using Avalon.Inspector.Utilities;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Avalon.Inspector.Members
+namespace Ayla.Inspector
 {
     public class InspectorSerializedFieldMember : InspectorMember
     {

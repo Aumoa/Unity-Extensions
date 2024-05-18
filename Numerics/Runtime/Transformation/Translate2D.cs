@@ -9,6 +9,11 @@ namespace Ayla.Numerics
         public double x;
         public double y;
 
+        public readonly Vector2 TransformPoint(in Vector2 rhs)
+        {
+            return Vector2Utility.Add(rhs, this);
+        }
+
         public static Translate2D identity
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

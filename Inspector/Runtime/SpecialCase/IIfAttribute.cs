@@ -1,4 +1,4 @@
-namespace Avalon.Inspector.SpecialCase
+namespace Ayla.Inspector
 {
     public interface IIfAttribute
     {

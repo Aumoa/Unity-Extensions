@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace Avalon.Inspector.Decorator
+namespace Ayla.Inspector
 {
     [CustomPropertyDrawer(typeof(SeparatorAttribute))]
     public class SeparatorDecoratorDrawer : DecoratorDrawer

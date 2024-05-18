@@ -1,6 +1,6 @@
 using System;
 
-namespace Avalon.Inspector
+namespace Ayla.Inspector
 {
     public class TerminateInspectorTickAndRepaint : Exception
     {

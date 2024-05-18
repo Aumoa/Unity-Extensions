@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Avalon.Inspector.Utilities
+namespace Ayla.Inspector
 {
     internal static class ListUtility
     {

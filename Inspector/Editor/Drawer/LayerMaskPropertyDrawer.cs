@@ -1,10 +1,9 @@
 #if UNITY_EDITOR
-using Avalon.Inspector.Utilities;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 
-namespace Avalon.Inspector.Drawer
+namespace Ayla.Inspector
 {
     [CustomPropertyDrawer(typeof(LayerMaskAttribute))]
     public class LayerMaskPropertyDrawer : PropertyDrawer

@@ -1,4 +1,4 @@
-﻿namespace Avalon.Inspector.Meta
+﻿namespace Ayla.Inspector
 {
     public abstract class InvertableIfAttribute : MetaIfAttribute
     {

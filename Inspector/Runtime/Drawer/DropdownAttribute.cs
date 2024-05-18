@@ -1,6 +1,6 @@
 using System;
 
-namespace Avalon.Inspector.Drawer
+namespace Ayla.Inspector
 {
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public class DropdownAttribute : InspectorAttribute

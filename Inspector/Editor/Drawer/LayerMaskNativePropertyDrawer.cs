@@ -1,12 +1,10 @@
 #if UNITY_EDITOR
 using System;
-using Avalon.Inspector.Members;
-using Avalon.Inspector.Utilities;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 
-namespace Avalon.Inspector.Drawer
+namespace Ayla.Inspector
 {
     [CustomNativePropertyDrawer(typeof(LayerMaskAttribute))]
     public class LayerMaskNativePropertyDrawer : NativePropertyDrawer

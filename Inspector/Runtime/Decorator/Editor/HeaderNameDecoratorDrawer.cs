@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace Ayla.Inspector.Decorator.Editor
+namespace Ayla.Inspector
 {
     [CustomPropertyDrawer(typeof(HeaderNameAttribute))]
     public class HeaderNameDecoratorDrawer : DecoratorDrawer

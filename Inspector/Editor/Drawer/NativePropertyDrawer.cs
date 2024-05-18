@@ -1,12 +1,10 @@
 ﻿#if UNITY_EDITOR
 using System;
-using Avalon.Inspector.Members;
-using Avalon.Inspector.Utilities;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Avalon.Inspector.Drawer
+namespace Ayla.Inspector
 {
     public class NativePropertyDrawer
     {

@@ -1,9 +1,8 @@
 #if UNITY_EDITOR
-using Avalon.Inspector.Utilities;
 using UnityEditor;
 using UnityEngine;
 
-namespace Avalon.Inspector.Drawer
+namespace Ayla.Inspector
 {
     [CustomPropertyDrawer(typeof(MinMaxSliderAttribute))]
     public class MinMaxSliderPropertyDrawer : PropertyDrawer

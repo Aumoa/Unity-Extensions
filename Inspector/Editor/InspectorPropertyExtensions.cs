@@ -4,16 +4,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Avalon.Inspector.Members;
-using Avalon.Inspector.Members;
-using Avalon.Inspector.Meta;
-using Avalon.Inspector.SpecialCase;
-using Avalon.Inspector.Utilities;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Avalon.Inspector
+namespace Ayla.Inspector
 {
     public static class InspectorPropertyExtensions
     {
