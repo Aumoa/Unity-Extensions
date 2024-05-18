@@ -1,6 +1,6 @@
 using Ayla.Numerics;
 
-namespace Ayla.Widgets
+namespace Ayla.SlateCore
 {
     public struct RenderTransform
     {

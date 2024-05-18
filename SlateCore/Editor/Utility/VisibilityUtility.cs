@@ -1,8 +1,6 @@
 using System;
-using Unity.Android.Types;
-using UnityEngine.UIElements;
 
-namespace Ayla.Widgets.Utility
+namespace Ayla.SlateCore
 {
     public static class VisibilityUtility
     {

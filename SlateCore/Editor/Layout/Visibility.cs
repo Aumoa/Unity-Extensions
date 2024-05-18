@@ -1,4 +1,4 @@
-namespace Ayla.Widgets
+namespace Ayla.SlateCore
 {
     public enum Visibility
     {

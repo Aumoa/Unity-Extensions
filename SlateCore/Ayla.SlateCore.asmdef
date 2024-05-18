@@ -1,6 +1,6 @@
 {
-    "name": "Ayla.Widgets",
-    "rootNamespace": "Ayla.Widgets",
+    "name": "Ayla.SlateCore",
+    "rootNamespace": "Ayla.SlateCore",
     "references": [
         "Ayla.Numerics"
     ],
