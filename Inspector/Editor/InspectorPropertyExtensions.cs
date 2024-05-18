@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Pool;
 using Object = UnityEngine.Object;
 
 namespace Ayla.Inspector
@@ -136,35 +137,36 @@ namespace Ayla.Inspector
 
         private static void SortInspectorMembers(List<InspectorMember> inoutMembers)
         {
-            var orders = ListUtility.AcquireScoped<(InspectorMember, OrderAttribute)>();
-
-            foreach (var member in inoutMembers)
+            using (ListPool<(InspectorMember, OrderAttribute)>.Get(out var orders))
             {
-                var attribute = member.GetCustomAttribute<OrderAttribute>();
-                if (attribute != null)
+                foreach (var member in inoutMembers)
                 {
-                    orders.m_Source.Add((member, attribute));
-                }
-            }
-
-            foreach (var (member, order) in orders.m_Source)
-            {
-                if (order is OrderBeforeAttribute orderBefore)
-                {
-                    inoutMembers.Remove(member);
-                    int indexOf = inoutMembers.FindIndex(p => p.name == orderBefore.memberName);
-                    if (indexOf != -1)
+                    var attribute = member.GetCustomAttribute<OrderAttribute>();
+                    if (attribute != null)
                     {
-                        inoutMembers.Insert(indexOf, member);
+                        orders.Add((member, attribute));
                     }
                 }
-                else if (order is OrderAfterAttribute orderAfter)
+
+                foreach (var (member, order) in orders)
                 {
-                    inoutMembers.Remove(member);
-                    int indexOf = inoutMembers.FindIndex(p => p.name == orderAfter.memberName);
-                    if (indexOf != -1)
+                    if (order is OrderBeforeAttribute orderBefore)
                     {
-                        inoutMembers.Insert(indexOf + 1, member);
+                        inoutMembers.Remove(member);
+                        int indexOf = inoutMembers.FindIndex(p => p.name == orderBefore.memberName);
+                        if (indexOf != -1)
+                        {
+                            inoutMembers.Insert(indexOf, member);
+                        }
+                    }
+                    else if (order is OrderAfterAttribute orderAfter)
+                    {
+                        inoutMembers.Remove(member);
+                        int indexOf = inoutMembers.FindIndex(p => p.name == orderAfter.memberName);
+                        if (indexOf != -1)
+                        {
+                            inoutMembers.Insert(indexOf + 1, member);
+                        }
                     }
                 }
             }
@@ -172,41 +174,43 @@ namespace Ayla.Inspector
 
         public static InspectorMember[] GetInspectorChildren(this object targetObject, Object unityObject, InspectorMember parent, IEnumerable<SerializedProperty> serializedProperties)
         {
-            var list = ListUtility.AcquireScoped<InspectorMember>();
-            InternalGetInspectorChildren(targetObject, unityObject, parent, serializedProperties, list.m_Source);
-
-            var groups = ListUtility.AcquireScoped<(string name, List<InspectorMember> list)>();
-            for (int i = 0; i < list.m_Source.Count; ++i)
+            using (ListPool<InspectorMember>.Get(out var list))
+            using (ListPool<(string name, List<InspectorMember> list)>.Get(out var groups))
             {
-                var child = list.m_Source[i];
-                var groupBoxAttr = child.GetCustomAttribute<BoxGroupAttribute>();
-                if (groupBoxAttr != null)
+                InternalGetInspectorChildren(targetObject, unityObject, parent, serializedProperties, list);
+
+                for (int i = 0; i < list.Count; ++i)
                 {
-                    var indexOf = groups.m_Source.FindIndex(p => p.name == groupBoxAttr.groupName);
-                    if (indexOf == -1)
+                    var child = list[i];
+                    var groupBoxAttr = child.GetCustomAttribute<BoxGroupAttribute>();
+                    if (groupBoxAttr != null)
                     {
-                        indexOf = groups.m_Source.Count;
-                        groups.m_Source.Add((groupBoxAttr.groupName, ListUtility.Acquire<InspectorMember>()));
+                        var indexOf = groups.FindIndex(p => p.name == groupBoxAttr.groupName);
+                        if (indexOf == -1)
+                        {
+                            indexOf = groups.Count;
+                            groups.Add((groupBoxAttr.groupName, ListPool<InspectorMember>.Get()));
+                        }
+
+                        var value = groups[indexOf];
+                        value.list.Add(child);
+
+                        list.RemoveAt(i--);
                     }
-
-                    var value = groups.m_Source[indexOf];
-                    value.list.Add(child);
-                    
-                    list.m_Source.RemoveAt(i--);
                 }
-            }
 
-            int insertIndex = 1;
-            foreach (var group in groups.m_Source)
-            {
-                SortInspectorMembers(group.list);
-                var inspectorGroup = new InspectorGroup(parent, unityObject, group.name, group.name, group.list.ToArray());
-                list.m_Source.Insert(insertIndex++, inspectorGroup);
-                ListUtility.Release(group.list);
+                int insertIndex = 1;
+                foreach (var group in groups)
+                {
+                    SortInspectorMembers(group.list);
+                    var inspectorGroup = new InspectorGroup(parent, unityObject, group.name, group.name, group.list.ToArray());
+                    list.Insert(insertIndex++, inspectorGroup);
+                    ListPool<InspectorMember>.Release(group.list);
+                }
+
+                SortInspectorMembers(list);
+                return list.ToArray();
             }
-            
-            SortInspectorMembers(list.m_Source);
-            return list.m_Source.ToArray();
         }
 
         private static void InternalGetInspectorChildren(this object targetObject, Object unityObject, InspectorMember parent, IEnumerable<SerializedProperty> serializedProperties, List<InspectorMember> output)
@@ -379,19 +383,21 @@ namespace Ayla.Inspector
                     && type != typeof(MonoBehaviour);
             }
 
-            var stack = ListUtility.AcquireScoped<Type>();
-            while (IsNotInstrictTypeOrNull(baseType))
+            using (ListPool<Type>.Get(out var stack))
             {
-                stack.m_Source.Add(baseType);
-                baseType = baseType!.BaseType;
-            }
-
-            while (ListUtility.TryPop(stack.m_Source, out var pop))
-            {
-                inTypeChangeCallback?.Invoke(pop);
-                foreach (var member in pop.GetMembers(bindingFlags))
+                while (IsNotInstrictTypeOrNull(baseType))
                 {
-                    memberCallback.Invoke(member);
+                    stack.Add(baseType);
+                    baseType = baseType!.BaseType;
+                }
+
+                while (ListUtility.TryPop(stack, out var pop))
+                {
+                    inTypeChangeCallback?.Invoke(pop);
+                    foreach (var member in pop.GetMembers(bindingFlags))
+                    {
+                        memberCallback.Invoke(member);
+                    }
                 }
             }
         }

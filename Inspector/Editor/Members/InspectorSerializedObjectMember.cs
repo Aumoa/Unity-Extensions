@@ -3,6 +3,7 @@ using System;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
+using UnityEngine.Pool;
 using Object = UnityEngine.Object;
 
 namespace Ayla.Inspector
@@ -61,9 +62,11 @@ namespace Ayla.Inspector
 
         private void CacheChildren()
         {
-            var list = ListUtility.AcquireScoped<SerializedProperty>();
-            serializedObject.GetChildren(list.m_Source);
-            cachedChildren = GetValue().GetInspectorChildren(GetUnityObject(), this, list.m_Source);
+            using (ListPool<SerializedProperty>.Get(out var list))
+            {
+                serializedObject.GetChildren(list);
+                cachedChildren = GetValue().GetInspectorChildren(GetUnityObject(), this, list);
+            }
         }
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using System.Linq.Expressions;
 using System.Reflection;
+using UnityEngine.Pool;
 
 namespace Ayla.Inspector
 {
@@ -39,13 +40,15 @@ namespace Ayla.Inspector
 
         public static MethodInfo[] GetMethodsRecursive(this Type type, BindingFlags bindingFlags)
         {
-            var list = ListUtility.AcquireScoped<MethodInfo>();
-            for (var current = type; current != null; current = current.BaseType)
+            using (ListPool<MethodInfo>.Get(out var list))
             {
-                list.m_Source.AddRange(current.GetMethods(bindingFlags));
-            }
+                for (var current = type; current != null; current = current.BaseType)
+                {
+                    list.AddRange(current.GetMethods(bindingFlags));
+                }
 
-            return list.m_Source.ToArray();
+                return list.ToArray();
+            }
         }
     }
 }

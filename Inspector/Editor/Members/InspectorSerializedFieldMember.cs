@@ -4,6 +4,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
+using UnityEngine.Pool;
 using Object = UnityEngine.Object;
 
 namespace Ayla.Inspector
@@ -38,9 +39,11 @@ namespace Ayla.Inspector
 
         private void CacheChildren()
         {
-            var list = ListUtility.AcquireScoped<SerializedProperty>();
-            m_SerializedProperty.GetChildren(list.m_Source);
-            m_CachedChildren = GetValue().GetInspectorChildren(GetUnityObject(), this, list.m_Source);
+            using (ListPool<SerializedProperty>.Get(out var list))
+            {
+                m_SerializedProperty.GetChildren(list);
+                m_CachedChildren = GetValue().GetInspectorChildren(GetUnityObject(), this, list);
+            }
         }
 
         public override float GetHeight()
