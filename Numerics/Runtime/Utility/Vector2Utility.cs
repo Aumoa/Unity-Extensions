@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace Ayla.Numerics.Utility
+namespace Ayla.Numerics
 {
     public static class Vector2Utility
     {
@@ -73,6 +73,7 @@ namespace Ayla.Numerics.Utility
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct<T>(in T value, out double x, out double y)
+            where T : IVector2
         {
             x = value.x;
             y = value.y;

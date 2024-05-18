@@ -1,5 +1,4 @@
 using System;
-using Ayla.Numerics.Utility;
 using System.Runtime.CompilerServices;
 
 namespace Ayla.Numerics
@@ -10,10 +9,23 @@ namespace Ayla.Numerics
         public double x;
         public double y;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T2 Concatenate<T1, T2>(in T1 scale, in T2 value)
+            where T1 : IVector2
+            where T2 : struct, IVector2
+        {
+            return Vector2Utility.Multiply(value, scale);
+        }
+
         public static Scale2D identity
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => Vector2Utility.Make<Scale2D>(0, 1);
+        }
+
+        public static Scale2D Uniform(double value)
+        {
+            return Vector2Utility.Make<Scale2D>(value, value);
         }
 
         double IVector2.x

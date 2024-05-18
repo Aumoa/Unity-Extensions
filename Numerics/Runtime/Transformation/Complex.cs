@@ -1,5 +1,4 @@
 using System;
-using Ayla.Numerics.Utility;
 using System.Runtime.CompilerServices;
 
 namespace Ayla.Numerics

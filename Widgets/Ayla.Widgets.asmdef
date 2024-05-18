@@ -1,0 +1,16 @@
+{
+    "name": "Ayla.Widgets",
+    "rootNamespace": "Ayla.Widgets",
+    "references": [
+        "Ayla.Numerics"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

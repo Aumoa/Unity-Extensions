@@ -1,0 +1,17 @@
+{
+	"name": "com.aylaextensions.widgets",
+	"displayName": "AylaWidgets",
+	"author": {
+		"name": "Aumoa",
+		"url": "https://github.com/Aumoa"
+	},
+	"version": "0.1.4",
+	"unity": "2018.4",
+	"description": "Editor Widget Utility",
+	"keywords": ["Widget", "UI"],
+	"license": "MIT",
+	"category": "Editor",
+	"dependencies": {
+		"com.aylaextensions.inspector": "git@github.com:Aumoa/Unity-Extensions.git?path=Widgets"
+	}
+}
