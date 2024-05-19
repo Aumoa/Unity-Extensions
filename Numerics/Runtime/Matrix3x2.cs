@@ -11,33 +11,30 @@ namespace Ayla.Numerics
         public double m20;
         public double m21;
 
-        public static Matrix2x2 identity => Matrix2x2Utility.Make<Matrix2x2>(1, 0, 0, 1);
-
-        public static Matrix2x2 Scale<T>(in T scale) where T : IVector2
+        public Translate2D translation
         {
-            return Matrix2x2Utility.Make<Matrix2x2>(
-                scale.x, 0,
-                0, scale.y
-            );
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => Vector2.Make<Translate2D>(m20, m21);
         }
 
-        public static Matrix2x2 Shear<T>(in T shear) where T : IVector2
+        public static Matrix3x2 identity => Identity<Matrix3x2>();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Matrix3x2 Scale<T>(in T scale) where T : IVector2
         {
-            return Matrix2x2Utility.Make<Matrix2x2>(
-                1, shear.y,
-                shear.x, 1
-            );
+            return Matrix2x2.Cast<Matrix3x2>.Do(Matrix2x2.Scale(scale));
         }
 
-        public static Matrix2x2 Rotation(in Radians rad)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Matrix3x2 Shear<T>(in T shear) where T : IVector2
         {
-            Mathd.SinCos(rad, out double s, out double c);
+            return Matrix2x2.Cast<Matrix3x2>.Do(Matrix2x2.Shear(shear));
+        }
 
-            return Matrix2x2Utility.Make<Matrix2x2>
-            (
-                c, -s,
-                s, c
-            );
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Matrix3x2 Rotation(in Complex complex)
+        {
+            return Matrix2x2.Cast<Matrix3x2>.Do(Matrix2x2.Rotation(complex));
         }
 
         double IMatrix2x2.m00
@@ -96,6 +93,32 @@ namespace Ayla.Numerics
             m11 = 1.0;
             m20 = 0.0;
             m21 = 0.0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T Make<T>(double p00, double p01, double p10, double p11, double p20, double p21)
+            where T : struct, IMatrix3x2
+        {
+            var result = default(T);
+            result.m00 = p00;
+            result.m01 = p01;
+            result.m10 = p10;
+            result.m11 = p11;
+            result.m20 = p20;
+            result.m21 = p21;
+            return result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Matrix3x2 Make(double p00, double p01, double p10, double p11, double p20, double p21)
+        {
+            return Make<Matrix3x2>(p00, p01, p10, p11, p20, p21);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T Identity<T>() where T : struct, IMatrix3x2
+        {
+            return Matrix2x2.Identity<T>();
         }
     }
 }

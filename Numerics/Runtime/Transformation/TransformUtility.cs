@@ -2,10 +2,10 @@ using System.Runtime.CompilerServices;
 
 namespace Ayla.Numerics
 {
-    public static class Transformation2DUtility
+    public static class TransformUtility
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T Concatenate<T>(in Translate2D lhs, in T rhs)
+        public static T Concatenate<T>(this Translate2D lhs, in T rhs)
             where T : struct, IVector2
         {
             var result = default(T);
@@ -15,7 +15,7 @@ namespace Ayla.Numerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T Concatenate<T>(in Scale2D lhs, in T rhs)
+        public static T Concatenate<T>(this Scale2D lhs, in T rhs)
             where T : struct, IVector2
         {
             var result = default(T);
